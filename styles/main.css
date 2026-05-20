@@ -111,8 +111,9 @@ table.grid tr:last-child td{border-bottom:none}
 
 /* ── SHIFT & DAY SPLITS ── */
 .day-sep { border-right: 3px solid var(--acc)!important; }
-.shift-sep { border-right: 2px dashed var(--muted)!important; background: rgba(0,0,0,0.015); }
-body.dark .shift-sep { background: rgba(255,255,255,0.03); }
+.shift-sep { border-right: 2px dashed var(--muted)!important; }
+.s2-bg { background: rgba(59, 91, 219, 0.025)!important; }
+body.dark .s2-bg { background: rgba(255, 255, 255, 0.03)!important; }
 
 /* ── DRAG AND DROP ── */
 .lc[draggable="true"]{cursor:grab}

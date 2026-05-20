@@ -113,7 +113,8 @@ function renderDashTable() {
       ${t.absent ? '<span class="tag td" style="font-size:9px;padding:1px 4px">відс.</span>' : ''}
     </td>`;
     row.forEach((e, l) => {
-      const clsN = (l === 5) ? 'shift-sep' : '';
+      let clsN = (l === 5) ? 'shift-sep' : '';
+      if (l >= 6) clsN += ' s2-bg';
       if (e) {
         const cls  = cById(e.classId);
         const subj = sById(e.subjectId);

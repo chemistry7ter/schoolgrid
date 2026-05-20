@@ -175,7 +175,8 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
 }
 
 function _cellHTML(e, t, l, dayIdx, hs) {
-  const clsName = (l === 5) ? 'shift-sep' : '';
+  let clsName = (l === 5) ? 'shift-sep' : '';
+  if (l >= 6) clsName += ' s2-bg';
   if (e) {
     const cls  = cById(e.classId);
     const subj = sById(e.subjectId);
