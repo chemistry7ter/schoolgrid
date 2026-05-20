@@ -89,9 +89,9 @@
         <div style="display:flex;gap:3px" id="dashDayBtns"></div>
       </div>
       <div class="swrap" style="border:none;border-radius:0;max-height:370px">
-        <table class="grid"><thead><tr>
+        <table class="grid"><thead id="dashThead"><tr>
           <th class="tc">Вчитель</th>
-          <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+          <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
         </tr></thead><tbody id="dashTbody"></tbody></table>
       </div>
       <div class="lgrow" style="padding:9px 15px;border-top:1px solid var(--border)">
@@ -307,7 +307,7 @@
         <div class="ch"><span class="ct"><i class="fa-solid fa-gear" style="color:var(--muted)"></i>Параметри</span></div>
         <div class="cb">
           <div class="fg"><label class="fl">Алгоритм</label><select class="fi" id="genAlgo"><option value="smart">Розумний backtracking</option><option value="greedy">Жадібний</option><option value="random">Рандомізований</option></select></div>
-          <div class="fg"><label class="fl">Макс. уроків на день (клас)</label><input class="fi" type="number" id="genMaxL" value="7" min="4" max="9"></div>
+          <div class="fg"><label class="fl">Макс. уроків на день (клас)</label><input class="fi" type="number" id="genMaxL" value="12" min="4" max="15"></div>
           <div class="fg"><label class="fl">Ітерацій оптимізації</label><input class="fi" type="number" id="genIter" value="300" min="50" max="2000"></div>
           <div class="toggle"><input type="checkbox" id="genBal" checked><label for="genBal">Рівномірний розподіл по тижню</label></div>
           <div class="toggle"><input type="checkbox" id="genNoFri"><label for="genNoFri">Уникати 6-7 уроків у п'ятницю</label></div>

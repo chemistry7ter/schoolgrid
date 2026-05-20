@@ -213,7 +213,7 @@ export let SCHED = {};
 export let SETTINGS = {
   schoolName: 'Школа №7 м. Тернопіль',
   year:       '2025–2026',
-  maxLessons: 7,
+  maxLessons: 12,
   norm:       18,
   autoSub:    true,
   notif:      true,
@@ -273,7 +273,12 @@ export function loadAll() {
     if (d)  { DEPTS.length = 0;      JSON.parse(d).forEach(x => DEPTS.push(x)); }
     if (su) { SUBJECTS.length = 0;   JSON.parse(su).forEach(x => SUBJECTS.push(x)); }
     if (s)  Object.assign(SCHED, JSON.parse(s));
-    if (st) Object.assign(SETTINGS, JSON.parse(st));
+    if (st) {
+      const saved = JSON.parse(st);
+      // Migration: if user has old 7-lesson limit, upgrade to 12
+      if (saved.maxLessons === 7) saved.maxLessons = 12;
+      Object.assign(SETTINGS, saved);
+    }
     if (cu) Object.assign(CURRICULUM, JSON.parse(cu));
 
     return true;

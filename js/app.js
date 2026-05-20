@@ -95,7 +95,8 @@ function dashDS(d, btn) {
 function renderDashTable() {
   renderDashStats();
   renderDashDayBtns();
-  const tb = $('dashTbody'); if (!tb) return;
+  const th = $('dashThead'), tb = $('dashTbody'); if (!tb) return;
+  if (th) th.innerHTML = `<tr><th class="tc">Вчитель</th>${BELLS.map(b => `<th>${b.n}</th>`).join('')}</tr>`;
   const ents = getDay(SCHED, dashDay);
   const tm   = {};
   ents.forEach(e => {
@@ -486,7 +487,7 @@ function delRoom(i) { if (!confirm('Видалити?')) return; ROOMS.splice(i,
 // ─ SETTINGS ─
 function saveSettings() {
   SETTINGS.schoolName = $('sName')?.value || SETTINGS.schoolName;
-  SETTINGS.maxLessons = +$('sMax')?.value || 7;
+  SETTINGS.maxLessons = +$('sMax')?.value || 12;
   SETTINGS.norm       = +$('sNorm')?.value || 18;
   autosave(); toast('Налаштування збережено', 'ok');
 }

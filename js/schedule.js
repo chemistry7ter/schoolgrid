@@ -367,7 +367,7 @@ export function showTD(id) {
         const ents = getDay(SCHED, di).filter(e => e.teacherId === id);
         return `<div style="background:var(--bg);border-radius:8px;padding:7px">
           <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${d.slice(0,2)}</div>
-          ${ents.slice(0, 12).map(e => { const cls = cById(e.classId); const subj = sById(e.subjectId); const col = subj ? subj.color : 'var(--acc)'; return `<div style="font-size:9px;padding:2px 4px;border-radius:3px;margin-bottom:2px;background:${col}18;color:${col};font-weight:700">${cN(cls)}</div>`; }).join('')}
+          ${ents.slice(0, BELLS.length).map(e => { const cls = cById(e.classId); const subj = sById(e.subjectId); const col = subj ? subj.color : 'var(--acc)'; return `<div style="font-size:9px;padding:2px 4px;border-radius:3px;margin-bottom:2px;background:${col}18;color:${col};font-weight:700">${cN(cls)}</div>`; }).join('')}
         </div>`;
       }).join('')}
     </div>`;
