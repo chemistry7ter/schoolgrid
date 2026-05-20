@@ -1,0 +1,20 @@
+[
+  {"id":1,"num":"101","name":"Математики №1","cap":32,"type":"classroom","subjects":[1,2,3],"hardTeachers":[],"softTeachers":[1,13],"note":""},
+  {"id":2,"num":"102","name":"Математики №2","cap":30,"type":"classroom","subjects":[1,2,3],"hardTeachers":[],"softTeachers":[22,27],"note":""},
+  {"id":3,"num":"201","name":"Фізики","cap":28,"type":"lab","subjects":[4],"hardTeachers":[2],"softTeachers":[14],"note":"Лаб. обладнання"},
+  {"id":4,"num":"202","name":"Хімії","cap":28,"type":"lab","subjects":[5],"hardTeachers":[3],"softTeachers":[10,37],"note":"Витяжка"},
+  {"id":5,"num":"203","name":"Біології","cap":30,"type":"lab","subjects":[6],"hardTeachers":[4],"softTeachers":[16,31],"note":""},
+  {"id":6,"num":"301","name":"Укр. мови №1","cap":32,"type":"classroom","subjects":[8,9],"hardTeachers":[],"softTeachers":[0,15],"note":""},
+  {"id":7,"num":"302","name":"Укр. мови №2","cap":30,"type":"classroom","subjects":[8,9],"hardTeachers":[],"softTeachers":[34,35],"note":""},
+  {"id":8,"num":"305","name":"Інозем. мов №1","cap":16,"type":"classroom","subjects":[10,11],"hardTeachers":[],"softTeachers":[6,20],"note":"Для груп"},
+  {"id":9,"num":"306","name":"Інозем. мов №2","cap":16,"type":"classroom","subjects":[10,11,12],"hardTeachers":[],"softTeachers":[32],"note":""},
+  {"id":10,"num":"401","name":"Географії/Іст.","cap":30,"type":"classroom","subjects":[14,15,16],"hardTeachers":[],"softTeachers":[5,18,29],"note":""},
+  {"id":11,"num":"105","name":"Інформатики №1","cap":20,"type":"computer","subjects":[7],"hardTeachers":[],"softTeachers":[11],"note":"20 ПК"},
+  {"id":12,"num":"106","name":"Інформатики №2","cap":20,"type":"computer","subjects":[7],"hardTeachers":[],"softTeachers":[11],"note":""},
+  {"id":13,"num":"СЗ-А","name":"Спортзал вел.","cap":80,"type":"gym","subjects":[22],"hardTeachers":[],"softTeachers":[7,21],"note":""},
+  {"id":14,"num":"СЗ-Б","name":"Спортзал мал.","cap":30,"type":"gym","subjects":[22],"hardTeachers":[],"softTeachers":[33],"note":""},
+  {"id":15,"num":"207","name":"Трудового навч.","cap":25,"type":"workshop","subjects":[21],"hardTeachers":[12],"softTeachers":[30],"note":""},
+  {"id":16,"num":"Акт.","name":"Актова зала","cap":200,"type":"art","subjects":[19,20],"hardTeachers":[],"softTeachers":[19,9],"note":""},
+  {"id":17,"num":"111","name":"Поч. класи №1","cap":30,"type":"classroom","subjects":[24,26],"hardTeachers":[],"softTeachers":[23,24],"note":""},
+  {"id":18,"num":"112","name":"Поч. класи №2","cap":30,"type":"classroom","subjects":[24,26],"hardTeachers":[],"softTeachers":[25,26],"note":""}
+]

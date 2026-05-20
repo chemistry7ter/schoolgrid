@@ -1,0 +1,162 @@
+/*
+Purpose: Reusable UI component styles — buttons, tags, cards, modals, toast, form elements
+Inputs:  Imported by index.html after themes.css and main.css
+Outputs: Styled components available globally
+Dependencies: themes.css (CSS variables)
+*/
+
+/* ── BUTTONS ── */
+.bp {
+  background: var(--acc);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-family: 'Golos Text', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: .15s;
+  white-space: nowrap;
+}
+.bp:hover { background: var(--acc2); }
+.bp:active { transform: scale(.97); }
+
+.bs {
+  background: var(--white);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: 'Golos Text', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: .15s;
+  white-space: nowrap;
+}
+.bs:hover { background: var(--bg); border-color: #c5c9d9; }
+.bs:active { transform: scale(.97); }
+
+.icb {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  transition: .12s;
+}
+.icb:hover { background: var(--bg); color: var(--text); }
+.icb.del:hover { color: var(--err); background: var(--errbg); }
+
+/* ── BADGE ── */
+.badge {
+  background: var(--err);
+  color: #fff;
+  border-radius: 9px;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  margin-left: -2px;
+  margin-top: -7px;
+}
+
+/* ── TAGS ── */
+.tag { display: inline-flex; align-items: center; gap: 3px; padding: 2px 9px; border-radius: 99px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.tw  { background: var(--warnbg); color: var(--warn); }
+.td  { background: var(--errbg);  color: var(--err);  }
+.ts  { background: var(--okbg);   color: var(--ok);   }
+.ti  { background: var(--accl);   color: var(--acc);  }
+.tp  { background: var(--purbg);  color: var(--pur);  }
+.tt  { background: var(--tealbg); color: var(--teal); }
+
+/* ── CARD ── */
+.card { background: var(--white); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--sh); overflow: hidden; }
+.ch   { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ct   { font-weight: 600; font-size: 13.5px; display: flex; align-items: center; gap: 7px; }
+.cb   { padding: 16px 18px; }
+
+/* ── ALERT ITEMS ── */
+.ai   { display: flex; align-items: flex-start; gap: 11px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+.ai:last-child { border: none; }
+.aico { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.aid .aico { background: var(--errbg);  color: var(--err);  }
+.aiw .aico { background: var(--warnbg); color: var(--warn); }
+.ais .aico { background: var(--okbg);   color: var(--ok);   }
+.aii .aico { background: var(--accl);   color: var(--acc);  }
+.atx { flex: 1; min-width: 0; }
+.atx strong { display: block; font-weight: 600; font-size: 12.5px; }
+.atx span   { color: var(--muted); font-size: 11.5px; }
+
+/* ── AVAIL TEACHER ROW ── */
+.avt { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: .12s; margin-bottom: 6px; }
+.avt:hover, .avt.sel { border-color: var(--acc); background: var(--accl); }
+.ava { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.avn { font-size: 12.5px; font-weight: 600; }
+.avs { font-size: 11px; color: var(--muted); }
+
+/* ── MODALS ── */
+.movl { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.42); z-index: 400; align-items: center; justify-content: center; padding: 16px; }
+.movl.open { display: flex; }
+.modal { background: var(--white); border-radius: 15px; width: 100%; max-width: 510px; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,.18); }
+.modal.wide   { max-width: 780px; }
+.modal.narrow { max-width: 400px; }
+.mh { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--white); z-index: 1; }
+.mt { font-weight: 700; font-size: 15px; font-family: 'Unbounded', sans-serif; }
+.mclose { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 17px; padding: 4px; border-radius: 6px; line-height: 1; }
+.mclose:hover { background: var(--bg); }
+.mb { padding: 22px; }
+.mf { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 9px; position: sticky; bottom: 0; background: var(--white); }
+
+/* ── FORM ELEMENTS ── */
+.fg { margin-bottom: 14px; }
+label.fl { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 5px; }
+input.fi, select.fi, textarea.fi {
+  width: 100%; padding: 9px 12px;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: 'Golos Text', sans-serif; font-size: 13.5px;
+  outline: none; transition: .15s;
+  background: var(--white); color: var(--text);
+}
+input.fi:focus, select.fi:focus, textarea.fi:focus {
+  border-color: var(--acc);
+  box-shadow: 0 0 0 3px rgba(59,91,219,.1);
+}
+.fr  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+input[type=checkbox] { accent-color: var(--acc); }
+input[type=color]    { width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; padding: 2px; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  color: #fff; padding: 12px 18px;
+  border-radius: 10px; font-size: 13px; font-weight: 500;
+  box-shadow: var(--sh2); z-index: 9999;
+  max-width: 330px; display: none;
+  animation: slu .3s ease;
+}
+@keyframes slu { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ── TOOLTIP ── */
+.tip {
+  position: fixed; background: #1a1d2e; color: #fff;
+  padding: 5px 9px; border-radius: 6px; font-size: 11px;
+  pointer-events: none; z-index: 999; display: none;
+  line-height: 1.5; white-space: nowrap;
+}
+
+/* ── NOTIF PANEL ── */
+#npnl {
+  position: fixed; right: 18px; top: 64px;
+  width: 330px; background: var(--white);
+  border: 1px solid var(--border); border-radius: var(--r);
+  box-shadow: var(--sh2); z-index: 300; display: none;
+}

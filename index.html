@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SchoolGrid — Розклад школи</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!-- Styles: themes first (CSS vars), then layout, then components -->
+<link rel="stylesheet" href="styles/themes.css">
+<link rel="stylesheet" href="styles/main.css">
+<link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+
+<!-- ── TOOLTIP ── -->
+<div class="tip" id="tip"></div>
+<!-- ── TOAST ── -->
+<div id="toast"></div>
+
+<!-- ══ MOBILE SIDEBAR ══ -->
+<div class="sovl" id="sovl" onclick="App.closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sbhead">
+    <div class="logo">School<span>Grid</span></div>
+    <button class="bs" style="padding:4px 8px" onclick="App.closeSidebar()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="sbnav" id="sideNav"></div>
+</div>
+
+<!-- ══ TOPBAR ══ -->
+<nav class="topbar">
+  <button class="hburg" onclick="App.openSidebar()"><i class="fa-solid fa-bars"></i></button>
+  <div class="logo">School<span>Grid</span></div>
+  <div class="nav-links" id="mainNav"></div>
+  <div class="tbr">
+    <button class="bs" onclick="App.toggleDark()" title="Темна тема">
+      <i class="fa-solid fa-moon" id="darkIcon"></i>
+    </button>
+    <button class="bs" style="position:relative" onclick="App.toggleNotif()">
+      <i class="fa-solid fa-bell"></i><span class="ndot"></span>
+    </button>
+    <button class="bp keep" onclick="App.openM('findSub')">
+      <i class="fa-solid fa-magnifying-glass"></i><span>Знайти заміну</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ══ NOTIF PANEL ══ -->
+<div id="npnl">
+  <div class="ch">
+    <span class="ct"><i class="fa-solid fa-bell"></i>Сповіщення</span>
+    <button class="bs" style="font-size:11px;padding:3px 8px" onclick="document.getElementById('npnl').style.display='none'">Закрити</button>
+  </div>
+  <div style="padding:0 0 6px">
+    <div class="ai aid" style="padding:10px 15px">
+      <div class="aico"><i class="fa-solid fa-user-slash"></i></div>
+      <div class="atx"><strong>Марціняк О.І. відсутня</strong><span>Математика · 6А · 3-й урок</span></div>
+      <span style="font-size:10px;color:var(--muted);flex-shrink:0">9:15</span>
+    </div>
+    <div class="ai ais" style="padding:10px 15px">
+      <div class="aico"><i class="fa-solid fa-check"></i></div>
+      <div class="atx"><strong>Заміна підтверджена</strong><span>Ковальчук Л.М. → 9В</span></div>
+      <span style="font-size:10px;color:var(--muted);flex-shrink:0">вчора</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGES
+══════════════════════════════════════════════ -->
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="ph">
+    <div><div class="pt">Дашборд</div><div class="ps" id="dashDate"></div></div>
+    <div class="ph-actions">
+      <button class="bs" onclick="window.print()"><i class="fa-solid fa-print"></i>Друк</button>
+      <button class="bp" onclick="App.nav('generator')"><i class="fa-solid fa-wand-magic-sparkles"></i>Генерувати розклад</button>
+    </div>
+  </div>
+  <div class="srow" id="dashStats"></div>
+  <div class="dash-grid">
+    <div class="card">
+      <div class="ch">
+        <span class="ct"><i class="fa-solid fa-calendar-day" style="color:var(--acc)"></i>Розклад на сьогодні</span>
+        <div style="display:flex;gap:3px" id="dashDayBtns"></div>
+      </div>
+      <div class="swrap" style="border:none;border-radius:0;max-height:370px">
+        <table class="grid"><thead><tr>
+          <th class="tc">Вчитель</th>
+          <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+        </tr></thead><tbody id="dashTbody"></tbody></table>
+      </div>
+      <div class="lgrow" style="padding:9px 15px;border-top:1px solid var(--border)">
+        <div class="lgi"><span class="lgd" style="background:var(--okbg);border:1px solid var(--ok)"></span>Згенеровано</div>
+        <div class="lgi"><span class="lgd" style="background:var(--accl);border:1px solid var(--acc)"></span>Вручну</div>
+        <div class="lgi"><span class="lgd" style="background:var(--errbg);border:1px solid var(--err)"></span>Відсутній</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa-solid fa-triangle-exclamation" style="color:var(--err)"></i>Потрібна увага</span><span class="tag td" id="alertCount">0</span></div>
+        <div style="padding:5px 14px" id="dashAlerts"></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa-solid fa-clock" style="color:var(--acc)"></i>Розклад дзвінків</span></div>
+        <div style="padding:9px 13px" id="bellList"></div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa-solid fa-user-clock" style="color:var(--muted)"></i>Відсутні сьогодні</span></div>
+        <div style="padding:9px 12px" id="dashAbsent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="page" id="page-schedule">
+  <div class="ph">
+    <div><div class="pt">Розклад</div><div class="ps">Тижневий розклад · Тиждень 3</div></div>
+    <div class="ph-actions">
+      <button class="bs" onclick="window.print()"><i class="fa-solid fa-print"></i></button>
+      <button class="bp" onclick="App.nav('generator')"><i class="fa-solid fa-wand-magic-sparkles"></i>Генерувати</button>
+    </div>
+  </div>
+  <div class="ctrl">
+    <div class="sbox"><i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="schedQ" placeholder="Пошук..." oninput="App.renderMain(App.getCurDay())">
+    </div>
+    <select class="fs" id="subjF" onchange="App.renderMain(App.getCurDay())"><option value="">Всі предмети</option></select>
+    <select class="fs" id="classF" onchange="App.renderMain(App.getCurDay())"><option value="">Всі класи</option></select>
+    <div class="vsw" style="margin-left:auto">
+      <button class="active" id="vswT" onclick="App.setView('t')"><i class="fa-solid fa-chalkboard-user"></i> Вчителі</button>
+      <button id="vswC" onclick="App.setView('c')"><i class="fa-solid fa-door-open"></i> Класи</button>
+    </div>
+  </div>
+  <!-- Teacher view -->
+  <div id="tvw">
+    <div class="tbar" id="dayTabs">
+      <button class="ti2" onclick="App.switchDay(0,this)">Понеділок</button>
+      <button class="ti2" onclick="App.switchDay(1,this)">Вівторок</button>
+      <button class="ti2" onclick="App.switchDay(2,this)">Середа</button>
+      <button class="ti2" onclick="App.switchDay(3,this)">Четвер</button>
+      <button class="ti2" onclick="App.switchDay(4,this)">П'ятниця</button>
+      <button class="ti2 active" onclick="App.switchDay(5,this)">Весь тиждень</button>
+    </div>
+    <div class="swrap mh"><table class="grid"><thead id="mHead"></thead><tbody id="mBody"></tbody></table></div>
+  </div>
+  <!-- Class view -->
+  <div id="cvw" style="display:none">
+    <div class="ctrl">
+      <label style="font-size:13px;font-weight:600;white-space:nowrap">Клас / Група:</label>
+      <select class="fs" id="cpick" onchange="App.renderClassSched()"><option value="">Оберіть...</option></select>
+      <div class="tbar" id="cDayTabs" style="border:none;margin:0">
+        <button class="ti2 active" onclick="App.switchCDay(0,this)">Пн</button>
+        <button class="ti2" onclick="App.switchCDay(1,this)">Вт</button>
+        <button class="ti2" onclick="App.switchCDay(2,this)">Ср</button>
+        <button class="ti2" onclick="App.switchCDay(3,this)">Чт</button>
+        <button class="ti2" onclick="App.switchCDay(4,this)">Пт</button>
+        <button class="ti2" onclick="App.switchCDay(5,this)">Тиждень</button>
+      </div>
+    </div>
+    <div class="swrap mh" id="clsCont"><div class="empty"><i class="fa-solid fa-door-open"></i>Оберіть клас</div></div>
+  </div>
+  <div class="lgrow" style="margin-top:10px">
+    <div class="lgi"><span class="lgd" style="background:var(--okbg);border:1px solid var(--ok)"></span>Згенеровано</div>
+    <div class="lgi"><span class="lgd" style="background:var(--errbg);border:1px solid var(--err)"></span>Відсутній</div>
+    <div class="lgi"><span class="lgd" style="background:var(--purbg);border:1px solid var(--pur)"></span>Група</div>
+    <div style="margin-left:auto;font-size:11.5px;color:var(--muted)">← → міняти день · Клік — деталі · <i class="fa-solid fa-hand" style="font-size:10px"></i> Drag &amp; Drop</div>
+  </div>
+</div>
+
+<!-- SUBSTITUTIONS -->
+<div class="page" id="page-subs">
+  <div class="ph">
+    <div><div class="pt">Заміни</div><div class="ps">Управління замінами та відсутніми</div></div>
+    <div class="ph-actions">
+      <button class="bs" onclick="App.showPrintOrder()"><i class="fa-solid fa-file-export"></i>Наказ</button>
+      <button class="bp" onclick="App.openM('addAbsence')"><i class="fa-solid fa-user-plus"></i>Відсутність</button>
+    </div>
+  </div>
+  <div class="srow">
+    <div class="sc" style="border-left:4px solid var(--err)"><div class="sl">Не вирішено</div><div class="sv" style="color:var(--err)" id="subsU">0</div></div>
+    <div class="sc" style="border-left:4px solid var(--warn)"><div class="sl">В процесі</div><div class="sv" style="color:var(--warn)" id="subsP">0</div></div>
+    <div class="sc" style="border-left:4px solid var(--ok)"><div class="sl">Підтверджено</div><div class="sv" style="color:var(--ok)" id="subsC">0</div></div>
+    <div class="sc"><div class="sl">Місяць</div><div class="sv">43</div><div class="ss">замін</div></div>
+  </div>
+  <div class="slyt">
+    <div id="subsList"></div>
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa-solid fa-magnifying-glass" style="color:var(--acc)"></i>Пошук заміни</span></div>
+        <div class="cb">
+          <div class="fg"><label class="fl">Предмет</label><select class="fi" id="srSubj"><option value="">Будь-який</option></select></div>
+          <div class="fr">
+            <div class="fg"><label class="fl">День</label><select class="fi" id="srDay"><option value="0">Пн</option><option value="1">Вт</option><option value="2">Ср</option><option value="3">Чт</option><option value="4">Пт</option></select></div>
+            <div class="fg"><label class="fl">Урок</label><select class="fi" id="srLesson"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></div>
+          </div>
+          <button class="bp" style="width:100%;justify-content:center" onclick="App.runSubSearch()"><i class="fa-solid fa-magnifying-glass"></i>Знайти вільних</button>
+          <div id="srRes" style="margin-top:10px"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa-solid fa-chart-bar" style="color:var(--acc)"></i>Топ замін місяця</span></div>
+        <div class="cb" id="subStats"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TEACHERS -->
+<div class="page" id="page-teachers">
+  <div class="ph">
+    <div><div class="pt">Вчителі</div><div class="ps" id="tchSub"></div></div>
+    <div class="ph-actions">
+      <button class="bs" onclick="App.showWorkloadModal()"><i class="fa-solid fa-chart-bar"></i>Навантаження</button>
+      <button class="bp" onclick="App.openM('addTeacher')"><i class="fa-solid fa-user-plus"></i>Додати</button>
+    </div>
+  </div>
+  <div class="ctrl">
+    <div class="sbox"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="tchQ" placeholder="Пошук..." oninput="App.renderTeachers()"></div>
+    <select class="fs" id="tchDeptF" onchange="App.renderTeachers()"><option value="">Всі кафедри</option></select>
+    <select class="fs" id="tchSt" onchange="App.renderTeachers()"><option value="">Всі</option><option value="present">Присутні</option><option value="absent">Відсутні</option></select>
+  </div>
+  <div class="tgrid" id="tchGrid"></div>
+</div>
+
+<!-- DEPARTMENTS -->
+<div class="page" id="page-departments">
+  <div class="ph">
+    <div><div class="pt">Кафедри</div><div class="ps">Предметні кафедри та підрозділи</div></div>
+    <div class="ph-actions"><button class="bp" onclick="App.openM('addDept')"><i class="fa-solid fa-plus"></i>Кафедру</button></div>
+  </div>
+  <div class="tbar">
+    <button class="ti2 active" onclick="App.showRefTab('depts',this)">Кафедри</button>
+    <button class="ti2" onclick="App.showRefTab('deptTeachers',this)">Вчителі по кафедрах</button>
+  </div>
+  <div id="depts"></div>
+  <div id="deptTeachers" style="display:none"></div>
+</div>
+
+<!-- PARALLELS -->
+<div class="page" id="page-parallels">
+  <div class="ph">
+    <div><div class="pt">Паралелі та предмети</div><div class="ps">Навчальні плани — уроків на тиждень</div></div>
+    <div class="ph-actions"><button class="bp" onclick="App.openEditPlan(App.curParallel||5)"><i class="fa-solid fa-pencil"></i>Редагувати план</button></div>
+  </div>
+  <div class="tbar" id="parallelTabs"></div>
+  <div id="parallelContent"></div>
+</div>
+
+<!-- CLASSES & GROUPS -->
+<div class="page" id="page-classgroups">
+  <div class="ph">
+    <div><div class="pt">Класи та групи</div><div class="ps">Поділ класів на групи</div></div>
+    <div class="ph-actions">
+      <button class="bs" onclick="App.openM('addGroup')"><i class="fa-solid fa-object-group"></i>Додати групу</button>
+      <button class="bp" onclick="App.openM('addClass')"><i class="fa-solid fa-plus"></i>Додати клас</button>
+    </div>
+  </div>
+  <div id="classGroupsList"></div>
+</div>
+
+<!-- ROOMS -->
+<div class="page" id="page-rooms">
+  <div class="ph">
+    <div><div class="pt">Кабінети</div><div class="ps">Приміщення та прив'язки</div></div>
+    <div class="ph-actions"><button class="bp" onclick="App.openM('addRoom')"><i class="fa-solid fa-plus"></i>Кабінет</button></div>
+  </div>
+  <div class="tbar">
+    <button class="ti2 active" onclick="App.showRefTab('roomList',this)">Кабінети</button>
+    <button class="ti2" onclick="App.showRefTab('roomBindings',this)">Прив'язки предметів</button>
+    <button class="ti2" onclick="App.showRefTab('teacherRooms',this)">Вчитель → Кабінет</button>
+  </div>
+  <div id="roomList"></div>
+  <div id="roomBindings" style="display:none"></div>
+  <div id="teacherRooms" style="display:none"></div>
+</div>
+
+<!-- GENERATOR -->
+<div class="page" id="page-generator">
+  <div class="ph">
+    <div><div class="pt">Генератор розкладу</div><div class="ps">Автоматичне складання оптимального розкладу</div></div>
+    <div class="ph-actions">
+      <button class="bs" onclick="App.validateOnly()"><i class="fa-solid fa-circle-check"></i>Перевірити</button>
+      <button class="bp" id="genBtn" onclick="App.startGeneration()"><i class="fa-solid fa-play"></i>Генерувати</button>
+    </div>
+  </div>
+  <div class="gen-prog" id="genProg">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <b style="font-size:13px" id="genStatus">Ініціалізація...</b>
+      <span style="font-size:12px;color:var(--muted)" id="genPct">0%</span>
+    </div>
+    <div class="progwrap"><div class="progbar" id="progBar"></div></div>
+    <div class="genlog" id="genLog"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card"><div class="ch"><span class="ct"><i class="fa-solid fa-lock" style="color:var(--err)"></i>Жорсткі обмеження</span><span class="tag td">Обов'язкові</span></div><div class="cb" id="hardCons"></div></div>
+      <div class="card"><div class="ch"><span class="ct"><i class="fa-solid fa-sliders" style="color:var(--warn)"></i>М'які обмеження</span><span class="tag tw">Бажані</span></div><div class="cb" id="softCons"></div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="ch"><span class="ct"><i class="fa-solid fa-gear" style="color:var(--muted)"></i>Параметри</span></div>
+        <div class="cb">
+          <div class="fg"><label class="fl">Алгоритм</label><select class="fi" id="genAlgo"><option value="smart">Розумний backtracking</option><option value="greedy">Жадібний</option><option value="random">Рандомізований</option></select></div>
+          <div class="fg"><label class="fl">Макс. уроків на день (клас)</label><input class="fi" type="number" id="genMaxL" value="7" min="4" max="9"></div>
+          <div class="fg"><label class="fl">Ітерацій оптимізації</label><input class="fi" type="number" id="genIter" value="300" min="50" max="2000"></div>
+          <div class="toggle"><input type="checkbox" id="genBal" checked><label for="genBal">Рівномірний розподіл по тижню</label></div>
+          <div class="toggle"><input type="checkbox" id="genNoFri"><label for="genNoFri">Уникати 6-7 уроків у п'ятницю</label></div>
+          <div class="toggle"><input type="checkbox" id="genDbl" checked><label for="genDbl">Дозволити здвоєні уроки</label></div>
+        </div>
+      </div>
+      <div class="card"><div class="ch"><span class="ct"><i class="fa-solid fa-chart-bar" style="color:var(--acc)"></i>Результат</span></div><div class="cb" id="genResult"><div class="empty"><i class="fa-solid fa-wand-magic-sparkles"></i>Натисніть «Генерувати»</div></div></div>
+      <div class="card"><div class="ch"><span class="ct"><i class="fa-solid fa-circle-check" style="color:var(--ok)"></i>Перевірки</span></div><div class="cb" id="genChecks"><div class="empty"><i class="fa-solid fa-circle-check"></i>Результати тут</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYTICS -->
+<div class="page" id="page-analytics">
+  <div class="ph">
+    <div><div class="pt">Аналітика</div><div class="ps">Навантаження вчителів · Статистика</div></div>
+    <div class="ph-actions"><button class="bs"><i class="fa-solid fa-file-export"></i>Звіт</button></div>
+  </div>
+  <div class="srow">
+    <div class="sc"><div class="sl">Загал. годин</div><div class="sv" id="aTH">—</div><div class="ss">на тиждень</div></div>
+    <div class="sc"><div class="sl">Середнє</div><div class="sv" id="aAH">—</div><div class="ss">год/тиж</div></div>
+    <div class="sc"><div class="sl">Перевантажені</div><div class="sv" style="color:var(--err)" id="aOv">—</div><div class="ss">&gt;24 год</div></div>
+    <div class="sc"><div class="sl">Недозавантажені</div><div class="sv" style="color:var(--warn)" id="aUn">—</div><div class="ss">&lt;10 год</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card"><div class="ch"><span class="ct"><i class="fa-solid fa-chart-bar" style="color:var(--acc)"></i>Навантаження вчителів</span></div><div class="cb" id="aLoad"></div></div>
+    <div class="card"><div class="ch"><span class="ct"><i class="fa-solid fa-fire" style="color:var(--err)"></i>Теплова карта урок/день</span></div><div class="cb" style="overflow-x:auto" id="heatmap"></div></div>
+    <div class="card"><div class="ch"><span class="ct"><i class="fa-solid fa-chart-pie" style="color:var(--pur)"></i>Розподіл предметів</span></div><div class="cb" id="aSubj"></div></div>
+    <div class="card"><div class="ch"><span class="ct"><i class="fa-solid fa-list-check" style="color:var(--acc)"></i>Журнал замін</span></div><div class="cb" style="overflow-x:auto" id="subLogTable"></div></div>
+  </div>
+</div>
+
+<!-- CONFLICTS -->
+<div class="page" id="page-conflicts">
+  <div class="ph">
+    <div><div class="pt">Конфлікти</div><div class="ps">Автоматично виявлені проблеми розкладу</div></div>
+    <div class="ph-actions">
+      <button class="bs" onclick="App.renderConflicts()"><i class="fa-solid fa-rotate"></i>Перевірити</button>
+      <button class="bp" onclick="App.autoFixConflicts()"><i class="fa-solid fa-wand-magic-sparkles"></i>Виправити авто</button>
+    </div>
+  </div>
+  <div class="srow">
+    <div class="sc" style="border-left:4px solid var(--err)"><div class="sl">Критичних</div><div class="sv" style="color:var(--err)" id="cfCrit">0</div></div>
+    <div class="sc" style="border-left:4px solid var(--warn)"><div class="sl">Попереджень</div><div class="sv" style="color:var(--warn)" id="cfWarn">0</div></div>
+    <div class="sc" style="border-left:4px solid var(--acc)"><div class="sl">Інфо</div><div class="sv" style="color:var(--acc)" id="cfInfo">0</div></div>
+    <div class="sc" style="border-left:4px solid var(--ok)"><div class="sl">Вирішено</div><div class="sv" style="color:var(--ok)" id="cfFixed">0</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+    <div><div class="stit">Активні конфлікти</div><div id="cfList"></div></div>
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div class="card"><div class="ch"><span class="ct"><i class="fa-solid fa-calendar-week"></i>Травень 2025</span></div><div class="cb"><div class="mcal" id="mcal"></div></div></div>
+      <div class="card"><div class="ch"><span class="ct"><i class="fa-solid fa-lightbulb" style="color:var(--warn)"></i>Рекомендації</span></div><div class="cb" style="font-size:12.5px;line-height:1.75" id="cfRec"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="ph">
+    <div><div class="pt">Налаштування</div><div class="ps">Параметри системи</div></div>
+    <div class="ph-actions"><button class="bp" onclick="App.saveSettings()"><i class="fa-solid fa-floppy-disk"></i>Зберегти</button></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card"><div class="ch"><span class="ct"><i class="fa-solid fa-clock"></i>Розклад дзвінків</span></div><div class="cb" id="bellSet"></div></div>
+    <div class="card">
+      <div class="ch"><span class="ct"><i class="fa-solid fa-school"></i>Загальні</span></div>
+      <div class="cb">
+        <div class="fg"><label class="fl">Назва школи</label><input class="fi" id="sName" value="Школа №7 м. Тернопіль"></div>
+        <div class="fg"><label class="fl">Навчальний рік</label><input class="fi" id="sYear" value="2025–2026"></div>
+        <div class="fr">
+          <div class="fg"><label class="fl">Макс. уроків/день</label><input class="fi" type="number" id="sMax" value="7"></div>
+          <div class="fg"><label class="fl">Норма год/тиж</label><input class="fi" type="number" id="sNorm" value="18"></div>
+        </div>
+        <div class="toggle"><input type="checkbox" id="sAuto" checked><label for="sAuto">Авто-пошук замін</label></div>
+        <div class="toggle"><input type="checkbox" id="sNotif" checked><label for="sNotif">Сповіщення</label></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct"><i class="fa-solid fa-calendar-days"></i>Семестри</span></div>
+      <div class="cb">
+        <div class="fr"><div class="fg"><label class="fl">І семестр від</label><input class="fi" type="date" value="2025-09-01"></div><div class="fg"><label class="fl">до</label><input class="fi" type="date" value="2025-12-26"></div></div>
+        <div class="fr"><div class="fg"><label class="fl">ІІ семестр від</label><input class="fi" type="date" value="2026-01-12"></div><div class="fg"><label class="fl">до</label><input class="fi" type="date" value="2026-05-29"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="ct"><i class="fa-solid fa-file-arrow-down"></i>Імпорт / Експорт</span></div>
+      <div class="cb" style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+        <button class="bs" style="flex-direction:column;padding:13px;gap:6px;align-items:center;justify-content:center"><i class="fa-solid fa-file-excel" style="font-size:22px;color:var(--ok)"></i><span>Excel</span></button>
+        <button class="bs" style="flex-direction:column;padding:13px;gap:6px;align-items:center;justify-content:center" onclick="window.print()"><i class="fa-solid fa-file-pdf" style="font-size:22px;color:var(--err)"></i><span>PDF</span></button>
+        <button class="bs" style="flex-direction:column;padding:13px;gap:6px;align-items:center;justify-content:center"><i class="fa-solid fa-file-import" style="font-size:22px;color:var(--acc)"></i><span>Імпорт</span></button>
+        <button class="bs" style="flex-direction:column;padding:13px;gap:6px;align-items:center;justify-content:center"><i class="fa-brands fa-google" style="font-size:22px;color:var(--pur)"></i><span>Google Cal</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="botnav">
+  <div class="bng">
+    <button class="bnb active" onclick="App.nav('dashboard')"><i class="fa-solid fa-table-columns"></i>Дашборд</button>
+    <button class="bnb" onclick="App.nav('schedule')"><i class="fa-solid fa-calendar-week"></i>Розклад</button>
+    <button class="bnb" onclick="App.nav('subs')"><i class="fa-solid fa-arrows-rotate"></i>Заміни<span class="badge">3</span></button>
+    <button class="bnb" onclick="App.nav('generator')"><i class="fa-solid fa-wand-magic-sparkles"></i>Генератор</button>
+    <button class="bnb" onclick="App.openSidebar()"><i class="fa-solid fa-ellipsis"></i>Більше</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════ -->
+
+<!-- Find Sub -->
+<div class="movl" id="m-findSub"><div class="modal">
+  <div class="mh"><span class="mt">Знайти заміну</span><button class="mclose" onclick="App.closeM('findSub')"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="mb">
+    <div class="fg"><label class="fl">Вчитель що відсутній</label><select class="fi" id="fsTeacher"><option value="">Оберіть...</option></select></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">День</label><select class="fi" id="fsDay"><option value="0">Понеділок</option><option value="1">Вівторок</option><option value="2">Середа</option><option value="3">Четвер</option><option value="4">П'ятниця</option></select></div>
+      <div class="fg"><label class="fl">Урок №</label><select class="fi" id="fsLesson"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">Предмет</label><select class="fi" id="fsSubj"><option value="">Будь-який</option></select></div>
+    <button class="bp" style="width:100%;justify-content:center;margin-bottom:12px" onclick="App.doFindSub()"><i class="fa-solid fa-magnifying-glass"></i>Знайти вільних вчителів</button>
+    <div id="fsResults"></div>
+  </div>
+  <div class="mf"><button class="bs" onclick="App.closeM('findSub')">Закрити</button><button class="bp" id="fsConfirm" style="display:none" onclick="App.confirmFoundSub()"><i class="fa-solid fa-check"></i>Підтвердити</button></div>
+</div></div>
+
+<!-- Add Absence -->
+<div class="movl" id="m-addAbsence"><div class="modal">
+  <div class="mh"><span class="mt">Додати відсутність</span><button class="mclose" onclick="App.closeM('addAbsence')"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="mb">
+    <div class="fg"><label class="fl">Вчитель</label><select class="fi" id="abTeacher"><option value="">Оберіть...</option></select></div>
+    <div class="fr"><div class="fg"><label class="fl">Від</label><input class="fi" type="date" id="abFrom"></div><div class="fg"><label class="fl">До</label><input class="fi" type="date" id="abTo"></div></div>
+    <div class="fg"><label class="fl">Причина</label><select class="fi" id="abReason"><option>Хвороба</option><option>Курси кваліфікації</option><option>Відрядження</option><option>Відпустка</option><option>Сімейні обставини</option><option>Інше</option></select></div>
+    <div class="fg"><label class="fl">Примітка</label><textarea class="fi" id="abNote" rows="2" placeholder="Необов'язково..."></textarea></div>
+  </div>
+  <div class="mf"><button class="bs" onclick="App.closeM('addAbsence')">Скасувати</button><button class="bp" onclick="App.saveAbsence()"><i class="fa-solid fa-check"></i>Зберегти</button></div>
+</div></div>
+
+<!-- Add Dept -->
+<div class="movl" id="m-addDept"><div class="modal narrow">
+  <div class="mh"><span class="mt">Кафедра</span><button class="mclose" onclick="App.closeM('addDept')"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="mb">
+    <div class="fg"><label class="fl">Назва</label><input class="fi" id="deptName" placeholder="Математично-природнича"></div>
+    <div class="fg"><label class="fl">Завідувач</label><select class="fi" id="deptHead"><option value="">Оберіть...</option></select></div>
+    <div class="fg"><label class="fl">Колір</label><input type="color" id="deptColor" value="#3b5bdb" class="fi"></div>
+  </div>
+  <div class="mf"><button class="bs" onclick="App.closeM('addDept')">Скасувати</button><button class="bp" onclick="App.saveDept()"><i class="fa-solid fa-check"></i>Зберегти</button></div>
+</div></div>
+
+<!-- Add Room -->
+<div class="movl" id="m-addRoom"><div class="modal">
+  <div class="mh"><span class="mt" id="roomMT">Додати кабінет</span><button class="mclose" onclick="App.closeM('addRoom')"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="mb">
+    <div class="fr"><div class="fg"><label class="fl">Номер</label><input class="fi" id="roomNum" placeholder="214"></div><div class="fg"><label class="fl">Назва</label><input class="fi" id="roomName" placeholder="Математики"></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Місткість</label><input class="fi" type="number" id="roomCap" value="30"></div><div class="fg"><label class="fl">Тип</label><select class="fi" id="roomType"><option value="classroom">Звичайний</option><option value="lab">Лабораторія</option><option value="gym">Спортзал</option><option value="computer">Комп'ютерний</option><option value="workshop">Майстерня</option><option value="art">Актова зала</option></select></div></div>
+    <div class="fg"><label class="fl">Предмети (жорстка прив'язка)</label>
+      <div id="roomSubjC" style="display:flex;flex-wrap:wrap;gap:4px;padding:8px;border:1px solid var(--border);border-radius:8px;min-height:38px"></div>
+      <select class="fs" id="roomSubjA" onchange="App.addRoomSubj()" style="margin-top:6px;width:100%"><option value="">+ Предмет</option></select>
+    </div>
+    <div class="fg"><label class="fl">Вчителі — жорстка прив'язка</label>
+      <div id="roomHardC" style="display:flex;flex-wrap:wrap;gap:4px;padding:8px;border:1px solid var(--border);border-radius:8px;min-height:38px"></div>
+      <select class="fs" id="roomHardA" onchange="App.addRoomTch('hard')" style="margin-top:6px;width:100%"><option value="">+ Вчитель (жорстко)</option></select>
+    </div>
+    <div class="fg"><label class="fl">Вчителі — м'яка прив'язка</label>
+      <div id="roomSoftC" style="display:flex;flex-wrap:wrap;gap:4px;padding:8px;border:1px solid var(--border);border-radius:8px;min-height:38px"></div>
+      <select class="fs" id="roomSoftA" onchange="App.addRoomTch('soft')" style="margin-top:6px;width:100%"><option value="">+ Вчитель (м'яко)</option></select>
+    </div>
+    <div class="fg"><label class="fl">Примітка</label><input class="fi" id="roomNote" placeholder=""></div>
+  </div>
+  <div class="mf"><button class="bs" onclick="App.closeM('addRoom')">Скасувати</button><button class="bp" onclick="App.saveRoom()"><i class="fa-solid fa-check"></i>Зберегти</button></div>
+</div></div>
+
+<!-- Add Teacher -->
+<div class="movl" id="m-addTeacher"><div class="modal">
+  <div class="mh"><span class="mt" id="tchMT">Додати вчителя</span><button class="mclose" onclick="App.closeM('addTeacher')"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="mb">
+    <div class="fr"><div class="fg"><label class="fl">Прізвище</label><input class="fi" id="tchLast" placeholder="Марціняк"></div><div class="fg"><label class="fl">Ім'я та по батькові</label><input class="fi" id="tchFirst" placeholder="Олег Іванович"></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Кафедра</label><select class="fi" id="tchDept"><option value="">Оберіть...</option></select></div><div class="fg"><label class="fl">Кваліфікація</label><select class="fi" id="tchQual"><option>Спеціаліст</option><option>ІІ кат.</option><option>І кат.</option><option>Вища кат.</option></select></div></div>
+    <div class="fg"><label class="fl">Предмети</label>
+      <div id="tchSubjC" style="display:flex;flex-wrap:wrap;gap:4px;padding:8px;border:1px solid var(--border);border-radius:8px;min-height:38px"></div>
+      <select class="fs" id="tchSubjA" onchange="App.addTchSubj()" style="margin-top:6px;width:100%"><option value="">+ Предмет</option></select>
+    </div>
+    <div class="fr"><div class="fg"><label class="fl">Ставка (год/тиж)</label><input class="fi" type="number" id="tchH" value="18"></div><div class="fg"><label class="fl">Макс. год/тиж</label><input class="fi" type="number" id="tchMH" value="24"></div></div>
+    <div class="fg"><label class="fl">Недоступні дні</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap" id="tchUnavDiv">
+        <span class="chip" onclick="App.toggleUD(0,this)">Пн</span><span class="chip" onclick="App.toggleUD(1,this)">Вт</span>
+        <span class="chip" onclick="App.toggleUD(2,this)">Ср</span><span class="chip" onclick="App.toggleUD(3,this)">Чт</span>
+        <span class="chip" onclick="App.toggleUD(4,this)">Пт</span>
+      </div>
+    </div>
+  </div>
+  <div class="mf"><button class="bs" onclick="App.closeM('addTeacher')">Скасувати</button><button class="bp" onclick="App.saveTeacher()"><i class="fa-solid fa-check"></i>Зберегти</button></div>
+</div></div>
+
+<!-- Add Class -->
+<div class="movl" id="m-addClass"><div class="modal narrow">
+  <div class="mh"><span class="mt">Додати клас</span><button class="mclose" onclick="App.closeM('addClass')"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="mb">
+    <div class="fr"><div class="fg"><label class="fl">Паралель</label><select class="fi" id="clsP"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option></select></div><div class="fg"><label class="fl">Літера</label><input class="fi" id="clsL" placeholder="А" maxlength="2"></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Кл. керівник</label><select class="fi" id="clsT"><option value="">Оберіть...</option></select></div><div class="fg"><label class="fl">Учнів</label><input class="fi" type="number" id="clsCnt" value="28"></div></div>
+    <div class="fg"><label class="fl">Осн. кабінет</label><select class="fi" id="clsR"><option value="">Немає</option></select></div>
+  </div>
+  <div class="mf"><button class="bs" onclick="App.closeM('addClass')">Скасувати</button><button class="bp" onclick="App.saveClass()"><i class="fa-solid fa-check"></i>Зберегти</button></div>
+</div></div>
+
+<!-- Add Group -->
+<div class="movl" id="m-addGroup"><div class="modal">
+  <div class="mh"><span class="mt">Поділ класу на групи</span><button class="mclose" onclick="App.closeM('addGroup')"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="mb">
+    <div class="fg"><label class="fl">Клас</label><select class="fi" id="grpCls"><option value="">Оберіть...</option></select></div>
+    <div class="fg"><label class="fl">Предмет</label><select class="fi" id="grpSubj" onchange="App.renderGrpD()"><option value="">Оберіть...</option></select></div>
+    <div class="fg"><label class="fl">Кількість груп</label>
+      <div style="display:flex;gap:7px">
+        <span class="chip" onclick="App.setGC(1,this)">1 група</span>
+        <span class="chip active" onclick="App.setGC(2,this)">2 групи</span>
+        <span class="chip" onclick="App.setGC(3,this)">3 групи</span>
+      </div>
+    </div>
+    <div id="grpD"></div>
+  </div>
+  <div class="mf"><button class="bs" onclick="App.closeM('addGroup')">Скасувати</button><button class="bp" onclick="App.saveGroup()"><i class="fa-solid fa-check"></i>Зберегти</button></div>
+</div></div>
+
+<!-- Detail Modal (reused) -->
+<div class="movl" id="m-detail"><div class="modal">
+  <div class="mh"><span class="mt" id="detTitle">Деталі</span><button class="mclose" onclick="App.closeM('detail')"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="mb" id="detBody"></div>
+  <div class="mf" id="detFoot"><button class="bs" onclick="App.closeM('detail')">Закрити</button></div>
+</div></div>
+
+<!-- Edit Plan Modal -->
+<div class="movl" id="m-editPlan"><div class="modal wide">
+  <div class="mh"><span class="mt" id="planMT">Навчальний план</span><button class="mclose" onclick="App.closeM('editPlan')"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="mb" id="planBody"></div>
+  <div class="mf"><button class="bs" onclick="App.closeM('editPlan')">Скасувати</button><button class="bp" onclick="App.savePlan()"><i class="fa-solid fa-check"></i>Зберегти</button></div>
+</div></div>
+
+<!-- ── ES MODULE ENTRY POINT ── -->
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>
