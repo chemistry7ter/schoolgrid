@@ -99,13 +99,13 @@ function renderDashTable() {
   const ents = getDay(SCHED, dashDay);
   const tm   = {};
   ents.forEach(e => {
-    if (!tm[e.teacherId]) tm[e.teacherId] = Array(7).fill(null);
-    if (e.slot < 7) tm[e.teacherId][e.slot] = e;
+    if (!tm[e.teacherId]) tm[e.teacherId] = Array(BELLS.length).fill(null);
+    if (e.slot < BELLS.length) tm[e.teacherId][e.slot] = e;
   });
   const hs = Object.keys(SCHED).length > 0;
   let h = '';
   TEACHERS.slice(0, 22).forEach(t => {
-    const row = tm[t.id] || Array(7).fill(null);
+    const row = tm[t.id] || Array(BELLS.length).fill(null);
     h += `<tr><td class="tn" style="border-left:3px solid ${t.color}" onclick="App.showTD(${t.id})">
       ${t.last} ${t.first}
       <div style="font-size:10px;color:var(--muted)">${t.subjects.slice(0,2).map(s => sN(s)).join(', ')}</div>
@@ -386,8 +386,11 @@ function renderGrpD() {
       <div style="background:var(--bg);border-radius:8px;padding:10px;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
           <span style="font-weight:700;color:${PAL[i % PAL.length]}">Група ${i+1}</span>
-          <span style="font-size:11px;color:var(--muted)">≈${perG} учнів</span>
           <input class="fi" style="flex:1;padding:4px 8px;font-size:12px" placeholder="Назва" id="gn_${i}" value="Гр.${i+1}">
+          <div style="width:70px">
+            <label style="font-size:9px;color:var(--muted);display:block">Учнів</label>
+            <input type="number" class="fi" style="padding:4px 8px;font-size:12px" id="gc_${i}" value="${perG}">
+          </div>
         </div>
         <div class="fg" style="margin-bottom:0"><label class="fl">Вчитель</label>
           <select class="fi" id="gt_${i}"><option value="">Оберіть...</option>
@@ -400,7 +403,11 @@ function saveGroup() {
   const cid = +$('grpCls').value, sid = +$('grpSubj').value;
   if (!cid || !sid) return toast('Оберіть клас та предмет', 'err');
   const cls = CLASSES.find(c => c.id === cid); if (!cls) return;
-  const groups = Array.from({ length: gCnt }, (_, i) => ({ n: $('gn_' + i)?.value || `Гр.${i+1}`, t: +$('gt_' + i)?.value || 0 }));
+  const groups = Array.from({ length: gCnt }, (_, i) => ({
+    n: $('gn_' + i)?.value || `Гр.${i+1}`,
+    t: +$('gt_' + i)?.value || 0,
+    count: +$('gc_' + i)?.value || 0
+  }));
   if (!cls.groups) cls.groups = {};
   cls.groups[sid] = groups;
   autosave(); closeM('addGroup'); renderClassGroups();

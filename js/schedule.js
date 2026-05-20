@@ -81,8 +81,8 @@ function _renderDayView(thead, tbody, dayIdx, q, sf, cfv, hs) {
   const ents = getDay(SCHED, dayIdx);
   const tm = {};
   ents.forEach(e => {
-    if (!tm[e.teacherId]) tm[e.teacherId] = Array(7).fill(null);
-    if (e.slot < 7) tm[e.teacherId][e.slot] = e;
+    if (!tm[e.teacherId]) tm[e.teacherId] = Array(BELLS.length).fill(null);
+    if (e.slot < BELLS.length) tm[e.teacherId][e.slot] = e;
   });
 
   thead.innerHTML = `<tr><th class="tc">Вчитель / Предмет</th>${
@@ -98,7 +98,7 @@ function _renderDayView(thead, tbody, dayIdx, q, sf, cfv, hs) {
 
   let h = '';
   list.forEach(t => {
-    const row = tm[t.id] || Array(7).fill(null);
+    const row = tm[t.id] || Array(BELLS.length).fill(null);
     h += `<tr><td class="tn" style="border-left:3px solid ${t.color}" onclick="App.showTD(${t.id})">
       <div>${t.last} ${t.first}</div>
       <div style="font-size:10px;color:var(--muted)">${t.subjects.slice(0,2).map(s => sN(s)).join(', ')}</div>
@@ -115,7 +115,7 @@ function _renderDayView(thead, tbody, dayIdx, q, sf, cfv, hs) {
 
 function _renderWeekView(thead, tbody, q, sf, hs) {
   thead.innerHTML = `<tr><th class="tc">Вчитель</th>${
-    DAYS.map(d => `<th colspan="7" style="border-right:2px solid var(--border)">${d}</th>`).join('')
+    DAYS.map(d => `<th colspan="${BELLS.length}" style="border-right:2px solid var(--border)">${d}</th>`).join('')
   }</tr><tr><th class="tc"></th>${
     DAYS.map(() => BELLS.map(b => `<th>${b.n}</th>`).join('')).join('')
   }</tr>`;
@@ -137,10 +137,10 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
       const ents = getDay(SCHED, d);
       const tm = {};
       ents.forEach(e => {
-        if (!tm[e.teacherId]) tm[e.teacherId] = Array(7).fill(null);
-        if (e.slot < 7) tm[e.teacherId][e.slot] = e;
+        if (!tm[e.teacherId]) tm[e.teacherId] = Array(BELLS.length).fill(null);
+        if (e.slot < BELLS.length) tm[e.teacherId][e.slot] = e;
       });
-      for (let l = 0; l < 7; l++) {
+      for (let l = 0; l < BELLS.length; l++) {
         const e   = tm[t.id]?.[l];
         const bdr = d === 4 ? 'border-right:2px solid var(--border)' : '';
         if (e) {
@@ -367,7 +367,7 @@ export function showTD(id) {
         const ents = getDay(SCHED, di).filter(e => e.teacherId === id);
         return `<div style="background:var(--bg);border-radius:8px;padding:7px">
           <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${d.slice(0,2)}</div>
-          ${ents.slice(0,7).map(e => { const cls = cById(e.classId); const subj = sById(e.subjectId); const col = subj ? subj.color : 'var(--acc)'; return `<div style="font-size:9px;padding:2px 4px;border-radius:3px;margin-bottom:2px;background:${col}18;color:${col};font-weight:700">${cN(cls)}</div>`; }).join('')}
+          ${ents.slice(0, 12).map(e => { const cls = cById(e.classId); const subj = sById(e.subjectId); const col = subj ? subj.color : 'var(--acc)'; return `<div style="font-size:9px;padding:2px 4px;border-radius:3px;margin-bottom:2px;background:${col}18;color:${col};font-weight:700">${cN(cls)}</div>`; }).join('')}
         </div>`;
       }).join('')}
     </div>`;

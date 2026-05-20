@@ -61,15 +61,20 @@ export const cN  = c => c ? c.parallel + c.letter : '—';
 export const rN  = id => { const r = rById(id); return r ? r.num : '—'; };
 
 // ── Find best room for a teacher+subject ──
-export function findBestRoom(subjId, tchId, occupied = new Set()) {
-  const hard = _R.find(r => r.hardTeachers.includes(tchId) && !occupied.has(r.id));
+export function findBestRoom(subjId, tchId, occupied = new Set(), minCap = 0) {
+  const isOk = r => !occupied.has(r.id) && r.cap >= minCap;
+
+  const hard = _R.find(r => r.hardTeachers.includes(tchId) && isOk(r));
   if (hard) return hard.id;
-  const subj = _R.find(r => r.subjects.includes(subjId) && !occupied.has(r.id));
+
+  const subj = _R.find(r => r.subjects.includes(subjId) && isOk(r));
   if (subj) return subj.id;
-  const soft = _R.find(r => r.softTeachers.includes(tchId) && !occupied.has(r.id));
+
+  const soft = _R.find(r => r.softTeachers.includes(tchId) && isOk(r));
   if (soft) return soft.id;
-  // If no preferred room is free, try any free room
-  const any = _R.find(r => !occupied.has(r.id));
+
+  // If no preferred room is free, try any free room with enough capacity
+  const any = _R.find(isOk);
   return any ? any.id : null;
 }
 

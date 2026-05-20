@@ -96,7 +96,7 @@ export async function startGeneration() {
       if (groups && groups.length > 1) {
         groups.forEach((g, gi) => {
           const gt = tById(g.t) || tc[gi % tc.length];
-          reqs.push({ classId: cls.id, subjectId: +sid, teacherId: gt.id, hours: Math.ceil(h / groups.length), group: g.n });
+          reqs.push({ classId: cls.id, subjectId: +sid, teacherId: gt.id, hours: Math.ceil(h / groups.length), group: g.n, studentCount: g.count || 0 });
         });
       } else {
         // Distribute hours among available teachers for this subject
@@ -105,7 +105,7 @@ export async function startGeneration() {
         tc.forEach((t, ti) => {
           const take = Math.min(remH, hPerT);
           if (take > 0) {
-            reqs.push({ classId: cls.id, subjectId: +sid, teacherId: t.id, hours: take });
+            reqs.push({ classId: cls.id, subjectId: +sid, teacherId: t.id, hours: take, studentCount: cls.count || 0 });
             remH -= take;
           }
         });
@@ -119,9 +119,9 @@ export async function startGeneration() {
 
   // ── INIT FRESH SCHEDULE ──
   const ns = {};
-  for (let d = 0; d < 5; d++) { ns[d] = {}; for (let s = 0; s < 7; s++) ns[d][s] = []; }
+  for (let d = 0; d < 5; d++) { ns[d] = {}; for (let s = 0; s < BELLS.length; s++) ns[d][s] = []; }
 
-  const maxL  = +($('genMaxL')?.value  || 7);
+  const maxL  = +($('genMaxL')?.value  || 12);
   const bal   = $('genBal')?.checked   !== false;
   const noFri = $('genNoFri')?.checked;
 
@@ -129,7 +129,7 @@ export async function startGeneration() {
   const tBusy = {}, cBusy = {}, rBusy = {}, cCount = {};
   TEACHERS.forEach(t => { tBusy[t.id] = {}; for (let d = 0; d < 5; d++) tBusy[t.id][d] = new Set(); });
   CLASSES.forEach(c  => { cBusy[c.id] = {}; cCount[c.id] = {}; for (let d = 0; d < 5; d++) { cBusy[c.id][d] = new Set(); cCount[c.id][d] = 0; } });
-  for (let d = 0; d < 5; d++) { rBusy[d] = {}; for (let s = 0; s < 7; s++) rBusy[d][s] = new Set(); }
+  for (let d = 0; d < 5; d++) { rBusy[d] = {}; for (let s = 0; s < BELLS.length; s++) rBusy[d][s] = new Set(); }
 
   // ── CONSTRAINT CHECKER ──
   function canPlace(req, d, s) {
@@ -138,8 +138,8 @@ export async function startGeneration() {
     if (hard('no_double_class')   && cBusy[req.classId]?.[d]?.has(s))   return false;
     if (hard('max_lessons_day')   && (cCount[req.classId]?.[d] || 0) >= maxL) return false;
 
-    // Room check
-    const roomId = findBestRoom(req.subjectId, req.teacherId, rBusy[d][s]);
+    // Room check with capacity
+    const roomId = findBestRoom(req.subjectId, req.teacherId, rBusy[d][s], req.studentCount || 0);
     if (!roomId) return false;
 
     const t = tById(req.teacherId);
@@ -153,7 +153,7 @@ export async function startGeneration() {
 
   // ── PLACE ENTRY ──
   function place(req, d, s) {
-    const roomId = findBestRoom(req.subjectId, req.teacherId, rBusy[d][s]);
+    const roomId = findBestRoom(req.subjectId, req.teacherId, rBusy[d][s], req.studentCount || 0);
     ns[d][s].push({ classId: req.classId, subjectId: req.subjectId, teacherId: req.teacherId, roomId, group: req.group || null });
     tBusy[req.teacherId][d].add(s);
     cBusy[req.classId][d].add(s);
@@ -183,7 +183,7 @@ export async function startGeneration() {
     // Pass 2: relax soft constraints
     if (tp > 0) {
       for (let d = 0; d < 5 && tp > 0; d++) {
-        for (let s = 0; s < 7 && tp > 0; s++) {
+        for (let s = 0; s < BELLS.length && tp > 0; s++) {
           const t = tById(req.teacherId);
           if (!tBusy[req.teacherId][d].has(s) &&
               !cBusy[req.classId][d].has(s)   &&
@@ -277,7 +277,7 @@ export function runChecks() {
 
   // 1. Teacher double-booking
   for (let d = 0; d < 5; d++) {
-    for (let s = 0; s < 7; s++) {
+    for (let s = 0; s < BELLS.length; s++) {
       const ents = SCHED[d]?.[s] || [];
       const tc = {}, cc = {};
       ents.forEach(e => {
@@ -304,7 +304,7 @@ export function runChecks() {
   TEACHERS.forEach(t => {
     for (let d = 0; d < 5; d++) {
       const slots = [];
-      for (let s = 0; s < 7; s++) {
+      for (let s = 0; s < BELLS.length; s++) {
         if ((SCHED[d]?.[s] || []).some(e => e.teacherId === t.id)) slots.push(s);
       }
       if (slots.length > 1) {
