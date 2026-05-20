@@ -48,7 +48,7 @@ def run_test_suite(page):
     except:
         print("❌ Schedule generation timed out or failed.")
 
-    page.screenshot(path="/home/jules/verification/screenshots/test_suite_gen.png")
+    page.screenshot(path="verification/screenshots/test_suite_gen.png")
 
     # 3. Test Absence and Conflicts
     print("🤒 Testing Absence and Conflicts...")
@@ -71,20 +71,20 @@ def run_test_suite(page):
 
     crit_count = page.locator("#cfCrit").text_content()
     print(f"ℹ️ Critical conflicts found: {crit_count}")
-    page.screenshot(path="/home/jules/verification/screenshots/test_suite_conflicts.png")
+    page.screenshot(path="verification/screenshots/test_suite_conflicts.png")
 
     print("🏁 Test Suite Finished.")
 
 if __name__ == "__main__":
     # Ensure directories exist
-    os.makedirs("/home/jules/verification/screenshots", exist_ok=True)
-    os.makedirs("/home/jules/verification/videos", exist_ok=True)
+    os.makedirs("verification/screenshots", exist_ok=True)
+    os.makedirs("verification/videos", exist_ok=True)
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
             viewport={'width': 1280, 'height': 800},
-            record_video_dir="/home/jules/verification/videos"
+            record_video_dir="verification/videos"
         )
         page = context.new_page()
         try:
