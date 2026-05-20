@@ -148,7 +148,7 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
           const subj = sById(e.subjectId);
           const col  = subj ? subj.color : 'var(--acc)';
           const room = rN(e.roomId);
-          const tip  = `${t.last}·${subj ? subj.name : ''}·${cN(cls)}·${room}·${DAYS[d]}`;
+          const tip  = `${t.last} · ${cN(cls)} ${e.group || ''}`;
           h += `<td class="droptarget ${clsN}" data-tch="${t.id}" data-day="${d}" data-slot="${l}"
             ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${d},${l})"
             onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()">
@@ -182,7 +182,7 @@ function _cellHTML(e, t, l, dayIdx, hs) {
     const subj = sById(e.subjectId);
     const col  = subj ? subj.color : 'var(--acc)';
     const room = rN(e.roomId);
-    const tip  = `${t.last}·${subj ? subj.name : ''}·${cN(cls)}·${room}·${BELLS[l]?.s}`;
+    const tip  = `${t.last} · ${cN(cls)} ${e.group || ''}`;
     return `<td class="droptarget ${clsName}" data-tch="${t.id}" data-day="${dayIdx}" data-slot="${l}"
       ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${dayIdx},${l})"
       onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()">

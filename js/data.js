@@ -118,29 +118,29 @@ export let ROOMS = [
 // CLASSES
 // ──────────────────────────────────────────────
 export let CLASSES = [
-  { id:1,  parallel:1,  letter:'А', teacherId:23, count:26, roomId:17, groups:{} },
-  { id:2,  parallel:1,  letter:'Б', teacherId:24, count:24, roomId:17, groups:{} },
-  { id:3,  parallel:2,  letter:'А', teacherId:25, count:28, roomId:18, groups:{} },
-  { id:4,  parallel:2,  letter:'Б', teacherId:26, count:26, roomId:18, groups:{} },
-  { id:5,  parallel:3,  letter:'А', teacherId:0,  count:30, roomId:null, groups:{} },
-  { id:6,  parallel:3,  letter:'Б', teacherId:1,  count:29, roomId:null, groups:{} },
-  { id:7,  parallel:4,  letter:'А', teacherId:13, count:31, roomId:null, groups:{} },
-  { id:8,  parallel:4,  letter:'Б', teacherId:22, count:28, roomId:null, groups:{} },
-  { id:9,  parallel:5,  letter:'А', teacherId:4,  count:32, roomId:null, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}] } },
-  { id:10, parallel:5,  letter:'Б', teacherId:15, count:30, roomId:null, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}] } },
-  { id:11, parallel:6,  letter:'А', teacherId:3,  count:33, roomId:null, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}] } },
-  { id:12, parallel:6,  letter:'Б', teacherId:37, count:31, roomId:null, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}] } },
-  { id:13, parallel:7,  letter:'А', teacherId:8,  count:30, roomId:null, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
-  { id:14, parallel:7,  letter:'Б', teacherId:5,  count:29, roomId:null, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
-  { id:15, parallel:8,  letter:'А', teacherId:14, count:28, roomId:null, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
-  { id:16, parallel:8,  letter:'Б', teacherId:16, count:30, roomId:null, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
-  { id:17, parallel:9,  letter:'А', teacherId:29, count:27, roomId:null, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
-  { id:18, parallel:9,  letter:'Б', teacherId:36, count:29, roomId:null, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
-  { id:19, parallel:9,  letter:'В', teacherId:18, count:28, roomId:null, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}] } },
-  { id:20, parallel:10, letter:'А', teacherId:34, count:26, roomId:null, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
-  { id:21, parallel:10, letter:'Б', teacherId:35, count:28, roomId:null, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
-  { id:22, parallel:11, letter:'А', teacherId:17, count:24, roomId:null, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
-  { id:23, parallel:11, letter:'Б', teacherId:28, count:25, roomId:null, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
+  { id:1,  parallel:1,  letter:'А', teacherId:23, count:26, roomId:17, shift:1, groups:{} },
+  { id:2,  parallel:1,  letter:'Б', teacherId:24, count:24, roomId:17, shift:1, groups:{} },
+  { id:3,  parallel:2,  letter:'А', teacherId:25, count:28, roomId:18, shift:1, groups:{} },
+  { id:4,  parallel:2,  letter:'Б', teacherId:26, count:26, roomId:18, shift:1, groups:{} },
+  { id:5,  parallel:3,  letter:'А', teacherId:0,  count:30, roomId:null, shift:1, groups:{} },
+  { id:6,  parallel:3,  letter:'Б', teacherId:1,  count:29, roomId:null, shift:1, groups:{} },
+  { id:7,  parallel:4,  letter:'А', teacherId:13, count:31, roomId:null, shift:1, groups:{} },
+  { id:8,  parallel:4,  letter:'Б', teacherId:22, count:28, roomId:null, shift:1, groups:{} },
+  { id:9,  parallel:5,  letter:'А', teacherId:4,  count:32, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}] } },
+  { id:10, parallel:5,  letter:'Б', teacherId:15, count:30, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}] } },
+  { id:11, parallel:6,  letter:'А', teacherId:3,  count:33, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}] } },
+  { id:12, parallel:6,  letter:'Б', teacherId:37, count:31, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}] } },
+  { id:13, parallel:7,  letter:'А', teacherId:8,  count:30, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
+  { id:14, parallel:7,  letter:'Б', teacherId:5,  count:29, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
+  { id:15, parallel:8,  letter:'А', teacherId:14, count:28, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
+  { id:16, parallel:8,  letter:'Б', teacherId:16, count:30, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
+  { id:17, parallel:9,  letter:'А', teacherId:29, count:27, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
+  { id:18, parallel:9,  letter:'Б', teacherId:36, count:29, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
+  { id:19, parallel:9,  letter:'В', teacherId:18, count:28, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}] } },
+  { id:20, parallel:10, letter:'А', teacherId:34, count:26, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
+  { id:21, parallel:10, letter:'Б', teacherId:35, count:28, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
+  { id:22, parallel:11, letter:'А', teacherId:17, count:24, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:6},{n:'Гр.2',t:20}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
+  { id:23, parallel:11, letter:'Б', teacherId:28, count:25, roomId:null, shift:2, groups:{ 10:[{n:'Гр.1',t:20},{n:'Гр.2',t:32}], 7:[{n:'Гр.1',t:11},{n:'Гр.2',t:11}] } },
 ];
 
 // ──────────────────────────────────────────────
@@ -266,7 +266,14 @@ export function loadAll() {
     const cu = localStorage.getItem(LS_KEYS.curriculum);
 
     if (t)  Object.assign(TEACHERS,  [], JSON.parse(t)),  TEACHERS.length = 0, JSON.parse(t).forEach(x => TEACHERS.push(x));
-    if (c)  { CLASSES.length = 0;    JSON.parse(c).forEach(x => CLASSES.push(x)); }
+    if (c)  {
+      const parsed = JSON.parse(c);
+      CLASSES.length = 0;
+      parsed.forEach(x => {
+        if (x.shift === undefined) x.shift = (x.parallel <= 4) ? 1 : 2;
+        CLASSES.push(x);
+      });
+    }
     if (r)  { ROOMS.length = 0;      JSON.parse(r).forEach(x => ROOMS.push(x)); }
     if (ab) { ABSENCES.length = 0;   JSON.parse(ab).forEach(x => ABSENCES.push(x)); }
     if (sl) { SUBLOG.length = 0;     JSON.parse(sl).forEach(x => SUBLOG.push(x)); }

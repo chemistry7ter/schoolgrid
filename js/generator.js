@@ -138,6 +138,18 @@ export async function startGeneration() {
     if (hard('no_double_class')   && cBusy[req.classId]?.[d]?.has(s))   return false;
     if (hard('max_lessons_day')   && (cCount[req.classId]?.[d] || 0) >= maxL) return false;
 
+    const cls = cById(req.classId);
+    // Window check: if class already has lessons this day, new lesson must be adjacent
+    if (cCount[req.classId][d] > 0) {
+      const slots = Array.from(cBusy[req.classId][d]).sort((a,b) => a-b);
+      const minS = slots[0], maxS = slots[slots.length-1];
+      if (s !== minS - 1 && s !== maxS + 1) return false;
+    } else {
+      // First lesson of the day: respect shift
+      if (cls && cls.shift === 1 && s !== 0) return false; // First shift starts at 1st lesson
+      if (cls && cls.shift === 2 && s < 5) return false;   // Second shift starts later (e.g. 6th lesson)
+    }
+
     // Room check with capacity
     const roomId = findBestRoom(req.subjectId, req.teacherId, rBusy[d][s], req.studentCount || 0);
     if (!roomId) return false;
@@ -180,16 +192,35 @@ export async function startGeneration() {
       }
     }
 
-    // Pass 2: relax soft constraints
+    // Pass 2: relax soft constraints (but keep shift and window constraints)
     if (tp > 0) {
-      for (let d = 0; d < 5 && tp > 0; d++) {
+      for (const d of dayOrder) {
+        if (tp <= 0) break;
         for (let s = 0; s < BELLS.length && tp > 0; s++) {
           const t = tById(req.teacherId);
           if (!tBusy[req.teacherId][d].has(s) &&
               !cBusy[req.classId][d].has(s)   &&
               (cCount[req.classId][d] || 0) < maxL &&
               !t?.absent) {
-            place(req, d, s); tp--; placed++;
+
+            // Still check window/shift here
+            const cls = cById(req.classId);
+            let ok = false;
+            if (cCount[req.classId][d] > 0) {
+              const slots = Array.from(cBusy[req.classId][d]).sort((a,b) => a-b);
+              const minS = slots[0], maxS = slots[slots.length-1];
+              if (s === minS - 1 || s === maxS + 1) ok = true;
+            } else {
+              if (cls && cls.shift === 1 && s === 0) ok = true;
+              if (cls && cls.shift === 2 && s >= 5) ok = true;
+            }
+
+            if (ok) {
+              const roomId = findBestRoom(req.subjectId, req.teacherId, rBusy[d][s], req.studentCount || 0);
+              if (roomId) {
+                place(req, d, s); tp--; placed++;
+              }
+            }
           }
         }
       }
@@ -317,7 +348,24 @@ export function runChecks() {
     }
   });
 
-  // 4. Curriculum fulfillment
+  // 4. Windows in class schedule
+  CLASSES.forEach(c => {
+    for (let d = 0; d < 5; d++) {
+      const slots = [];
+      for (let s = 0; s < BELLS.length; s++) {
+        if ((SCHED[d]?.[s] || []).some(e => e.classId === c.id)) slots.push(s);
+      }
+      if (slots.length > 1) {
+        let w = 0;
+        for (let i = slots[0] + 1; i < slots[slots.length - 1]; i++) {
+          if (!slots.includes(i)) w++;
+        }
+        if (w > 0) issues.push({ t:'c', msg:`❌ Вікно у класу ${cN(c)} — ${DAYS[d]}` });
+      }
+    }
+  });
+
+  // 5. Curriculum fulfillment
   CLASSES.forEach(cls => {
     const plan = CURRICULUM[cls.parallel] || {};
     Object.entries(plan).forEach(([sid, req]) => {

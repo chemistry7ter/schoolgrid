@@ -120,8 +120,10 @@ function renderDashTable() {
         const subj = sById(e.subjectId);
         const col  = subj ? subj.color : 'var(--acc)';
         const room = rN(e.roomId);
+        const tip  = `${t.last} · ${cN(cls)} ${e.group || ''}`;
         h += `<td class="${clsN}"><span class="lc${t.absent ? ' lab' : hs ? ' lgen' : ''}"
           style="background:${col}22;color:${col};border:1px solid ${col}55"
+          onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()"
           onclick="App.showLD('${e ? JSON.stringify(e).replace(/'/g,"\\'") : ''}')">
           <span class="lgroup">${e.group || ''}</span>
           ${cN(cls)}
@@ -423,7 +425,16 @@ function delCls(id) { if (!confirm('Видалити клас?')) return; const 
 function saveClass() {
   const p = +$('clsP').value, letter = ($('clsL').value || '').trim().toUpperCase();
   if (!letter) return toast('Введіть літеру', 'err');
-  CLASSES.push({ id: CLASSES.length + 1, parallel: p, letter, teacherId: +$('clsT')?.value || 0, count: +$('clsCnt')?.value || 28, roomId: +$('clsR')?.value || null, groups: {} });
+  CLASSES.push({
+    id: CLASSES.length + 1,
+    parallel: p,
+    letter,
+    teacherId: +$('clsT')?.value || 0,
+    count: +$('clsCnt')?.value || 28,
+    roomId: +$('clsR')?.value || null,
+    shift: +$('clsShift')?.value || 1,
+    groups: {}
+  });
   autosave(); closeM('addClass'); renderClassGroups(); toast(`Клас ${p}${letter} додано`, 'ok');
 }
 
