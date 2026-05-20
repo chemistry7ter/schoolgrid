@@ -21,6 +21,8 @@ export const HARD_CONSTRAINTS = [
   { id:'teacher_absent',    label:'Не ставити уроки відсутньому вчителю',          enabled: true },
   { id:'room_hard',         label:"Жорстка прив'язка вчитель → кабінет",           enabled: true },
   { id:'curriculum',        label:'Виконати навчальний план (год/тиж)',             enabled: true },
+  { id:'shift_respect',     label:'Дотримання змінності (початок уроків)',         enabled: true },
+  { id:'no_windows_class',  label:'Відсутність вікон у класів',                    enabled: true },
 ];
 
 export const SOFT_CONSTRAINTS = [
@@ -140,11 +142,11 @@ export async function startGeneration() {
 
     const cls = cById(req.classId);
     // Window check: if class already has lessons this day, new lesson must be adjacent
-    if (cCount[req.classId][d] > 0) {
+    if (hard('no_windows_class') && cCount[req.classId][d] > 0) {
       const slots = Array.from(cBusy[req.classId][d]).sort((a,b) => a-b);
       const minS = slots[0], maxS = slots[slots.length-1];
       if (s !== minS - 1 && s !== maxS + 1) return false;
-    } else {
+    } else if (hard('shift_respect')) {
       // First lesson of the day: respect shift
       if (cls && cls.shift === 1 && s !== 0) return false; // First shift starts at 1st lesson
       if (cls && cls.shift === 2 && s < 5) return false;   // Second shift starts later (e.g. 6th lesson)
@@ -206,13 +208,23 @@ export async function startGeneration() {
             // Still check window/shift here
             const cls = cById(req.classId);
             let ok = false;
+            const hard = id => HARD_CONSTRAINTS.find(c => c.id === id && c.enabled);
+            const checkW = hard('no_windows_class');
+            const checkS = hard('shift_respect');
+
             if (cCount[req.classId][d] > 0) {
-              const slots = Array.from(cBusy[req.classId][d]).sort((a,b) => a-b);
-              const minS = slots[0], maxS = slots[slots.length-1];
-              if (s === minS - 1 || s === maxS + 1) ok = true;
+              if (!checkW) ok = true;
+              else {
+                const slots = Array.from(cBusy[req.classId][d]).sort((a,b) => a-b);
+                const minS = slots[0], maxS = slots[slots.length-1];
+                if (s === minS - 1 || s === maxS + 1) ok = true;
+              }
             } else {
-              if (cls && cls.shift === 1 && s === 0) ok = true;
-              if (cls && cls.shift === 2 && s >= 5) ok = true;
+              if (!checkS) ok = true;
+              else {
+                if (cls && cls.shift === 1 && s === 0) ok = true;
+                if (cls && cls.shift === 2 && s >= 5) ok = true;
+              }
             }
 
             if (ok) {

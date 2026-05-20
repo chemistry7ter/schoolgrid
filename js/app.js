@@ -215,10 +215,11 @@ function showRefTab(showId, btn) {
   btn.closest('.tbar').querySelectorAll('.ti2').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   btn.closest('.page').querySelectorAll('[id]').forEach(el => {
-    if (['depts','deptTeachers','roomList','roomBindings','teacherRooms'].includes(el.id)) el.style.display = 'none';
+    if (['depts','deptTeachers','roomList','roomBindings','teacherRooms','classGroupsList','classShifts'].includes(el.id)) el.style.display = 'none';
   });
   const t = btn.closest('.page').querySelector('#' + showId);
   if (t) t.style.display = '';
+  if (showId === 'classShifts') renderClassShifts();
 }
 
 function saveDept() {
@@ -353,7 +354,10 @@ function renderClassGroups() {
             <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg)">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
                 <div style="font-family:'Unbounded',sans-serif;font-size:17px;font-weight:700;color:var(--acc)">${cN(c)}</div>
-                <span class="tag ti">${c.count} учнів</span>
+                <div style="display:flex;gap:4px">
+                  <span class="tag ${c.shift === 1 ? 'ti' : 'tw'}" style="font-size:10px">${c.shift} зміна</span>
+                  <span class="tag tp" style="font-size:10px">${c.count} уч.</span>
+                </div>
               </div>
               <div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">
                 <i class="fa-solid fa-person-chalkboard" style="margin-right:4px"></i>Кл. кер.: <b>${head ? tN(head) : '—'}</b>
@@ -422,6 +426,38 @@ function saveGroup() {
   toast(`Поділ на ${gCnt} групи збережено`, 'ok');
 }
 function delCls(id) { if (!confirm('Видалити клас?')) return; const i = CLASSES.findIndex(c => c.id === id); if (i >= 0) { CLASSES.splice(i, 1); autosave(); renderClassGroups(); toast('Видалено', 'warn'); } }
+function renderClassShifts() {
+  const el = $('classShifts'); if (!el) return;
+  el.innerHTML = `
+    <div class="swrap"><table class="dt">
+      <thead><tr><th>Клас</th><th>Зміна</th><th>Умови</th><th></th></tr></thead>
+      <tbody>${CLASSES.map((c, i) => `
+        <tr>
+          <td><b style="font-family:'Unbounded',sans-serif">${cN(c)}</b></td>
+          <td>
+            <select class="fs" onchange="App.setClsShift(${c.id}, this.value)">
+              <option value="1" ${c.shift === 1 ? 'selected' : ''}>1 зміна</option>
+              <option value="2" ${c.shift === 2 ? 'selected' : ''}>2 зміна</option>
+            </select>
+          </td>
+          <td>
+            <div style="display:flex;gap:4px">
+              <span class="tag ti" title="Початок з 1-го уроку">Початок</span>
+              <span class="tag tw" title="Без порожніх уроків">Без вікон</span>
+            </div>
+          </td>
+          <td class="dt-act">
+            <button class="icb del" onclick="App.delCls(${c.id})"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>`).join('')}</tbody>
+    </table></div>`;
+}
+
+function setClsShift(id, val) {
+  const cls = CLASSES.find(c => c.id === id);
+  if (cls) { cls.shift = +val; autosave(); toast(`Зміну класу ${cN(cls)} змінено`, 'ok'); }
+}
+
 function saveClass() {
   const p = +$('clsP').value, letter = ($('clsL').value || '').trim().toUpperCase();
   if (!letter) return toast('Введіть літеру', 'err');
@@ -568,7 +604,7 @@ window.App = {
   openEditPlan, savePlan,
   get curParallel() { return curParallel; },
   // classes
-  openAddGroup, setGC, renderGrpD, saveGroup, delCls, saveClass,
+  openAddGroup, setGC, renderGrpD, saveGroup, delCls, saveClass, setClsShift,
   // settings
   saveSettings,
   // misc ref tabs

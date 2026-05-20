@@ -53,6 +53,14 @@ def run_verification():
         page.wait_for_timeout(500)
         page.screenshot(path="/home/jules/verification/screenshots/class_5A_schedule.png")
 
+        # 6. Check Classes & Groups page
+        page.click("nav.topbar >> text=Класи/групи")
+        page.wait_for_timeout(500)
+        # Click the "Зміни та умови" tab
+        page.click("button >> text=Зміни та умови")
+        page.wait_for_timeout(500)
+        page.screenshot(path="/home/jules/verification/screenshots/class_management_shifts.png")
+
         context.close()
         browser.close()
 

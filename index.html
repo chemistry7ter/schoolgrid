@@ -255,13 +255,18 @@
 <!-- CLASSES & GROUPS -->
 <div class="page" id="page-classgroups">
   <div class="ph">
-    <div><div class="pt">Класи та групи</div><div class="ps">Поділ класів на групи</div></div>
+    <div><div class="pt">Класи та групи</div><div class="ps">Управління класами, групами та змінами</div></div>
     <div class="ph-actions">
       <button class="bs" onclick="App.openM('addGroup')"><i class="fa-solid fa-object-group"></i>Додати групу</button>
       <button class="bp" onclick="App.openM('addClass')"><i class="fa-solid fa-plus"></i>Додати клас</button>
     </div>
   </div>
+  <div class="tbar">
+    <button class="ti2 active" onclick="App.showRefTab('classGroupsList',this)">Класи та групи</button>
+    <button class="ti2" onclick="App.showRefTab('classShifts',this)">Зміни та умови</button>
+  </div>
   <div id="classGroupsList"></div>
+  <div id="classShifts" style="display:none"></div>
 </div>
 
 <!-- ROOMS -->
