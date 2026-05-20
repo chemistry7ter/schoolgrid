@@ -78,6 +78,7 @@ export function renderMain(dayIdx) {
 }
 
 function _renderDayView(thead, tbody, dayIdx, q, sf, cfv, hs) {
+  $('mHead').closest('table').classList.remove('week-view');
   const ents = getDay(SCHED, dayIdx);
   const tm = {};
   ents.forEach(e => {
@@ -114,6 +115,7 @@ function _renderDayView(thead, tbody, dayIdx, q, sf, cfv, hs) {
 }
 
 function _renderWeekView(thead, tbody, q, sf, hs) {
+  $('mHead').closest('table').classList.add('week-view');
   thead.innerHTML = `<tr><th class="tc">Вчитель</th>${
     DAYS.map(d => `<th colspan="${BELLS.length}" class="day-sep">${d}</th>`).join('')
   }</tr><tr><th class="tc"></th>${
@@ -152,15 +154,16 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
           h += `<td class="droptarget ${clsN}" data-tch="${t.id}" data-day="${d}" data-slot="${l}"
             ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${d},${l})"
             onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()">
-            <span class="lc${t.absent ? ' lab' : hs ? ' lgen' : ''}"
-              style="font-size:8px;background:${col}22;color:${col};border:1px solid ${col}55;cursor:grab"
+            <span class="lc${t.absent ? ' lab' : hs ? ' lgen' : e.group ? ' lgrp' : ''}"
+              style="background:${col}22;color:${col};border:1px solid ${col}55;cursor:grab;font-size:12px;padding:3px"
               draggable="true"
               ondragstart="App.onDragStart(event,${t.id},${d},${l})"
               ondragend="App.onDragEnd(event)"
               onclick="App.showLD('${esc(JSON.stringify(e))}')"
             >
+              <span class="lgroup" style="font-size:9px">${e.group || ''}</span>
               ${cN(cls)}
-              <span style="font-size:7px;opacity:0.8">${room}</span>
+              <span class="lroom" style="font-size:9px;padding:0 2px">${room}</span>
             </span></td>`;
         } else {
           h += `<td class="droptarget ${clsN}" data-tch="${t.id}" data-day="${d}" data-slot="${l}"

@@ -146,10 +146,16 @@ export async function startGeneration() {
       const slots = Array.from(cBusy[req.classId][d]).sort((a,b) => a-b);
       const minS = slots[0], maxS = slots[slots.length-1];
       if (s !== minS - 1 && s !== maxS + 1) return false;
+
+      // Still respect shift boundaries even when expanding
+      if (hard('shift_respect')) {
+        if (cls.shift === 1 && s > 6) return false; // Shift 1 up to 7th lesson
+        if (cls.shift === 2 && s < 5) return false; // Shift 2 from 6th lesson
+      }
     } else if (hard('shift_respect')) {
       // First lesson of the day: respect shift
-      if (cls && cls.shift === 1 && s !== 0) return false; // First shift starts at 1st lesson
-      if (cls && cls.shift === 2 && s < 5) return false;   // Second shift starts later (e.g. 6th lesson)
+      if (cls && cls.shift === 1 && s !== 0) return false;
+      if (cls && cls.shift === 2 && s < 5) return false;
     }
 
     // Room check with capacity
@@ -213,11 +219,17 @@ export async function startGeneration() {
             const checkS = hard('shift_respect');
 
             if (cCount[req.classId][d] > 0) {
-              if (!checkW) ok = true;
-              else {
+              if (!checkW) {
+                ok = true;
+              } else {
                 const slots = Array.from(cBusy[req.classId][d]).sort((a,b) => a-b);
                 const minS = slots[0], maxS = slots[slots.length-1];
                 if (s === minS - 1 || s === maxS + 1) ok = true;
+              }
+              // In pass 2, still enforce shift boundaries if checkS is on
+              if (ok && checkS) {
+                if (cls.shift === 1 && s > 6) ok = false;
+                if (cls.shift === 2 && s < 5) ok = false;
               }
             } else {
               if (!checkS) ok = true;

@@ -121,10 +121,10 @@ function renderDashTable() {
         const col  = subj ? subj.color : 'var(--acc)';
         const room = rN(e.roomId);
         const tip  = `${t.last} · ${cN(cls)} ${e.group || ''}`;
-        h += `<td class="${clsN}"><span class="lc${t.absent ? ' lab' : hs ? ' lgen' : ''}"
+        h += `<td class="${clsN}"><span class="lc${t.absent ? ' lab' : hs ? ' lgen' : e.group ? ' lgrp' : ''}"
           style="background:${col}22;color:${col};border:1px solid ${col}55"
           onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()"
-          onclick="App.showLD('${e ? JSON.stringify(e).replace(/'/g,"\\'") : ''}')">
+          onclick="App.showLD('${esc(JSON.stringify(e))}')">
           <span class="lgroup">${e.group || ''}</span>
           ${cN(cls)}
           <span class="lroom">${room}</span>
@@ -135,7 +135,7 @@ function renderDashTable() {
     });
     h += '</tr>';
   });
-  tb.innerHTML = h || `<tr><td colspan="8" class="empty" style="padding:24px">
+  tb.innerHTML = h || `<tr><td colspan="${BELLS.length + 1}" class="empty" style="padding:24px">
     <i class="fa-solid fa-wand-magic-sparkles" style="font-size:24px;display:block;margin-bottom:10px;opacity:.25"></i>
     Розклад ще не згенеровано</td></tr>`;
 }

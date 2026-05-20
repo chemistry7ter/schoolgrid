@@ -1,70 +1,64 @@
-from playwright.sync_api import sync_playwright
+import asyncio
+from playwright.async_api import async_playwright
 import os
+import subprocess
+import time
 
-def run_verification():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            record_video_dir="/home/jules/verification/videos",
-            viewport={'width': 1280, 'height': 800}
-        )
-        page = context.new_page()
+async def run_verification():
+    # Start a local server to avoid ES module CORS issues with file://
+    server = subprocess.Popen(["python3", "-m", "http.server", "8080"])
+    time.sleep(2) # Give server time to start
 
-        # 1. Load the page
-        page.goto("http://localhost:3000")
-        page.wait_for_timeout(1000)
+    try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch()
+            context = await browser.new_context(viewport={'width': 1280, 'height': 800})
+            page = await context.new_page()
 
-        # 2. Go to Generator and generate schedule
-        # Use a more specific selector to avoid sidebar buttons if they are hidden/off-screen
-        page.click("nav.topbar >> text=Генератор")
-        page.wait_for_timeout(500)
-        page.click("#genBtn")
+            # Open the app
+            print("Navigating to app...")
+            await page.goto("http://localhost:8080/index.html")
 
-        # Wait for generation to complete (it has some delays)
-        # We can wait for the "Готово!" status or the "Переглянути розклад" button
-        page.wait_for_selector("text=Готово!", timeout=30000)
-        page.wait_for_timeout(1000)
+            # Wait for App to initialize - check for a navigation link
+            await page.wait_for_selector("#nb-generator", timeout=10000)
 
-        # Screenshot of generator results
-        page.screenshot(path="/home/jules/verification/screenshots/generator_done.png")
+            # 1. Generate schedule
+            print("Starting generation...")
+            await page.click("#nb-generator")
+            await page.click("#genBtn")
 
-        # 3. Go to Schedule
-        page.click("button >> text=Переглянути розклад")
-        page.wait_for_timeout(1000)
+            # Wait for "Готово!" or "✅ Розміщено" in log
+            # The selector .genlog .lok appears when finished
+            await page.wait_for_selector(".genlog .lok", timeout=60000)
+            await asyncio.sleep(2) # Wait for UI updates
+            await page.screenshot(path="verification/screenshots/generator_done.png")
 
-        # Screenshot of the grid (teacher view)
-        # Ensure elements are in view
-        page.locator("#tvw .swrap.mh").evaluate("el => el.scrollIntoView()")
-        page.screenshot(path="/home/jules/verification/screenshots/schedule_grid.png")
+            # 2. Check Class Management (Shifts)
+            print("Checking class shifts...")
+            await page.click("#nb-classgroups")
+            await page.click("button:has-text('Зміни та умови')")
+            await asyncio.sleep(0.5)
+            await page.screenshot(path="verification/screenshots/class_shifts.png")
 
-        # 4. Test Tooltip
-        # Skip hover if it's being difficult with the viewport
+            # 3. Check Dashboard Schedule
+            print("Checking dashboard...")
+            await page.click("#nb-dashboard")
+            await asyncio.sleep(1)
+            # Ensure the table is rendered
+            await page.wait_for_selector("#dashTbody tr")
+            await page.screenshot(path="verification/screenshots/dashboard_schedule.png")
 
-        # 5. Check Class View (windows check)
-        page.click("#vswC")
-        page.wait_for_timeout(500)
-        # Pick 1A class (it's shift 1)
-        page.select_option("#cpick", label="1А")
-        page.wait_for_timeout(500)
-        page.screenshot(path="/home/jules/verification/screenshots/class_1A_schedule.png")
+            # 4. Check Schedule Week View
+            print("Checking schedule week view...")
+            await page.click("#nb-schedule")
+            await page.click("button:has-text('Весь тиждень')")
+            await asyncio.sleep(2)
+            await page.screenshot(path="verification/screenshots/schedule_grid.png")
 
-        # Pick 5A class (it's shift 2)
-        page.select_option("#cpick", label="5А")
-        page.wait_for_timeout(500)
-        page.screenshot(path="/home/jules/verification/screenshots/class_5A_schedule.png")
-
-        # 6. Check Classes & Groups page
-        page.click("nav.topbar >> text=Класи/групи")
-        page.wait_for_timeout(500)
-        # Click the "Зміни та умови" tab
-        page.click("button >> text=Зміни та умови")
-        page.wait_for_timeout(500)
-        page.screenshot(path="/home/jules/verification/screenshots/class_management_shifts.png")
-
-        context.close()
-        browser.close()
+            await browser.close()
+    finally:
+        server.terminate()
 
 if __name__ == "__main__":
-    os.makedirs("/home/jules/verification/videos", exist_ok=True)
-    os.makedirs("/home/jules/verification/screenshots", exist_ok=True)
-    run_verification()
+    os.makedirs("verification/screenshots", exist_ok=True)
+    asyncio.run(run_verification())
