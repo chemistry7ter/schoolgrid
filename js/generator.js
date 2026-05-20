@@ -99,7 +99,16 @@ export async function startGeneration() {
           reqs.push({ classId: cls.id, subjectId: +sid, teacherId: gt.id, hours: Math.ceil(h / groups.length), group: g.n });
         });
       } else {
-        reqs.push({ classId: cls.id, subjectId: +sid, teacherId: tc[0].id, hours: h });
+        // Distribute hours among available teachers for this subject
+        const hPerT = Math.ceil(h / tc.length);
+        let remH = h;
+        tc.forEach((t, ti) => {
+          const take = Math.min(remH, hPerT);
+          if (take > 0) {
+            reqs.push({ classId: cls.id, subjectId: +sid, teacherId: t.id, hours: take });
+            remH -= take;
+          }
+        });
       }
     });
   });
@@ -117,9 +126,10 @@ export async function startGeneration() {
   const noFri = $('genNoFri')?.checked;
 
   // ── TRACKING SETS ──
-  const tBusy = {}, cBusy = {}, cCount = {};
+  const tBusy = {}, cBusy = {}, rBusy = {}, cCount = {};
   TEACHERS.forEach(t => { tBusy[t.id] = {}; for (let d = 0; d < 5; d++) tBusy[t.id][d] = new Set(); });
   CLASSES.forEach(c  => { cBusy[c.id] = {}; cCount[c.id] = {}; for (let d = 0; d < 5; d++) { cBusy[c.id][d] = new Set(); cCount[c.id][d] = 0; } });
+  for (let d = 0; d < 5; d++) { rBusy[d] = {}; for (let s = 0; s < 7; s++) rBusy[d][s] = new Set(); }
 
   // ── CONSTRAINT CHECKER ──
   function canPlace(req, d, s) {
@@ -127,6 +137,11 @@ export async function startGeneration() {
     if (hard('no_double_teacher') && tBusy[req.teacherId]?.[d]?.has(s)) return false;
     if (hard('no_double_class')   && cBusy[req.classId]?.[d]?.has(s))   return false;
     if (hard('max_lessons_day')   && (cCount[req.classId]?.[d] || 0) >= maxL) return false;
+
+    // Room check
+    const roomId = findBestRoom(req.subjectId, req.teacherId, rBusy[d][s]);
+    if (!roomId) return false;
+
     const t = tById(req.teacherId);
     if (hard('teacher_avail')  && t?.unavail?.includes(d)) return false;
     if (hard('teacher_absent') && t?.absent)                return false;
@@ -138,10 +153,11 @@ export async function startGeneration() {
 
   // ── PLACE ENTRY ──
   function place(req, d, s) {
-    const roomId = findBestRoom(req.subjectId, req.teacherId);
+    const roomId = findBestRoom(req.subjectId, req.teacherId, rBusy[d][s]);
     ns[d][s].push({ classId: req.classId, subjectId: req.subjectId, teacherId: req.teacherId, roomId, group: req.group || null });
     tBusy[req.teacherId][d].add(s);
     cBusy[req.classId][d].add(s);
+    if (roomId) rBusy[d][s].add(roomId);
     cCount[req.classId][d] = (cCount[req.classId][d] || 0) + 1;
   }
 

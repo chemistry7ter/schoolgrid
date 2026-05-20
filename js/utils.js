@@ -61,14 +61,16 @@ export const cN  = c => c ? c.parallel + c.letter : '—';
 export const rN  = id => { const r = rById(id); return r ? r.num : '—'; };
 
 // ── Find best room for a teacher+subject ──
-export function findBestRoom(subjId, tchId) {
-  const hard = _R.find(r => r.hardTeachers.includes(tchId));
+export function findBestRoom(subjId, tchId, occupied = new Set()) {
+  const hard = _R.find(r => r.hardTeachers.includes(tchId) && !occupied.has(r.id));
   if (hard) return hard.id;
-  const subj = _R.find(r => r.subjects.includes(subjId));
+  const subj = _R.find(r => r.subjects.includes(subjId) && !occupied.has(r.id));
   if (subj) return subj.id;
-  const soft = _R.find(r => r.softTeachers.includes(tchId));
+  const soft = _R.find(r => r.softTeachers.includes(tchId) && !occupied.has(r.id));
   if (soft) return soft.id;
-  return null;
+  // If no preferred room is free, try any free room
+  const any = _R.find(r => !occupied.has(r.id));
+  return any ? any.id : null;
 }
 
 // ── Get all schedule entries for a given day ──
