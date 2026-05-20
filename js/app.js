@@ -95,34 +95,42 @@ function dashDS(d, btn) {
 function renderDashTable() {
   renderDashStats();
   renderDashDayBtns();
-  const tb = $('dashTbody'); if (!tb) return;
+  const th = $('dashThead'), tb = $('dashTbody'); if (!tb) return;
+  if (th) th.innerHTML = `<tr><th class="tc">Вчитель</th>${BELLS.map((b, i) => `<th class="${i === 5 ? 'shift-sep' : ''}">${b.n}</th>`).join('')}</tr>`;
   const ents = getDay(SCHED, dashDay);
   const tm   = {};
   ents.forEach(e => {
-    if (!tm[e.teacherId]) tm[e.teacherId] = Array(7).fill(null);
-    if (e.slot < 7) tm[e.teacherId][e.slot] = e;
+    if (!tm[e.teacherId]) tm[e.teacherId] = Array(BELLS.length).fill(null);
+    if (e.slot < BELLS.length) tm[e.teacherId][e.slot] = e;
   });
   const hs = Object.keys(SCHED).length > 0;
   let h = '';
   TEACHERS.slice(0, 22).forEach(t => {
-    const row = tm[t.id] || Array(7).fill(null);
+    const row = tm[t.id] || Array(BELLS.length).fill(null);
     h += `<tr><td class="tn" style="border-left:3px solid ${t.color}" onclick="App.showTD(${t.id})">
       ${t.last} ${t.first}
       <div style="font-size:10px;color:var(--muted)">${t.subjects.slice(0,2).map(s => sN(s)).join(', ')}</div>
       ${t.absent ? '<span class="tag td" style="font-size:9px;padding:1px 4px">відс.</span>' : ''}
     </td>`;
     row.forEach((e, l) => {
+      let clsN = (l === 5) ? 'shift-sep' : '';
+      if (l >= 6) clsN += ' s2-bg';
       if (e) {
         const cls  = cById(e.classId);
         const subj = sById(e.subjectId);
         const col  = subj ? subj.color : 'var(--acc)';
-        h += `<td><span class="lc${t.absent ? ' lab' : hs ? ' lgen' : ''}"
+        const room = rN(e.roomId);
+        const tip  = `${t.last} · ${cN(cls)} ${e.group || ''}`;
+        h += `<td class="${clsN}"><span class="lc${t.absent ? ' lab' : hs ? ' lgen' : ''}"
           style="background:${col}22;color:${col};border:1px solid ${col}55"
+          onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()"
           onclick="App.showLD('${e ? JSON.stringify(e).replace(/'/g,"\\'") : ''}')">
-          ${cN(cls)}${e.group ? '<br><span style="font-size:8px">' + e.group + '</span>' : ''}
+          <span class="lgroup">${e.group || ''}</span>
+          ${cN(cls)}
+          <span class="lroom">${room}</span>
           <span class="lnum">${l+1}</span></span></td>`;
       } else {
-        h += '<td></td>';
+        h += `<td class="${clsN}"></td>`;
       }
     });
     h += '</tr>';
@@ -386,8 +394,11 @@ function renderGrpD() {
       <div style="background:var(--bg);border-radius:8px;padding:10px;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
           <span style="font-weight:700;color:${PAL[i % PAL.length]}">Група ${i+1}</span>
-          <span style="font-size:11px;color:var(--muted)">≈${perG} учнів</span>
           <input class="fi" style="flex:1;padding:4px 8px;font-size:12px" placeholder="Назва" id="gn_${i}" value="Гр.${i+1}">
+          <div style="width:70px">
+            <label style="font-size:9px;color:var(--muted);display:block">Учнів</label>
+            <input type="number" class="fi" style="padding:4px 8px;font-size:12px" id="gc_${i}" value="${perG}">
+          </div>
         </div>
         <div class="fg" style="margin-bottom:0"><label class="fl">Вчитель</label>
           <select class="fi" id="gt_${i}"><option value="">Оберіть...</option>
@@ -400,7 +411,11 @@ function saveGroup() {
   const cid = +$('grpCls').value, sid = +$('grpSubj').value;
   if (!cid || !sid) return toast('Оберіть клас та предмет', 'err');
   const cls = CLASSES.find(c => c.id === cid); if (!cls) return;
-  const groups = Array.from({ length: gCnt }, (_, i) => ({ n: $('gn_' + i)?.value || `Гр.${i+1}`, t: +$('gt_' + i)?.value || 0 }));
+  const groups = Array.from({ length: gCnt }, (_, i) => ({
+    n: $('gn_' + i)?.value || `Гр.${i+1}`,
+    t: +$('gt_' + i)?.value || 0,
+    count: +$('gc_' + i)?.value || 0
+  }));
   if (!cls.groups) cls.groups = {};
   cls.groups[sid] = groups;
   autosave(); closeM('addGroup'); renderClassGroups();
@@ -410,7 +425,16 @@ function delCls(id) { if (!confirm('Видалити клас?')) return; const 
 function saveClass() {
   const p = +$('clsP').value, letter = ($('clsL').value || '').trim().toUpperCase();
   if (!letter) return toast('Введіть літеру', 'err');
-  CLASSES.push({ id: CLASSES.length + 1, parallel: p, letter, teacherId: +$('clsT')?.value || 0, count: +$('clsCnt')?.value || 28, roomId: +$('clsR')?.value || null, groups: {} });
+  CLASSES.push({
+    id: CLASSES.length + 1,
+    parallel: p,
+    letter,
+    teacherId: +$('clsT')?.value || 0,
+    count: +$('clsCnt')?.value || 28,
+    roomId: +$('clsR')?.value || null,
+    shift: +$('clsShift')?.value || 1,
+    groups: {}
+  });
   autosave(); closeM('addClass'); renderClassGroups(); toast(`Клас ${p}${letter} додано`, 'ok');
 }
 
@@ -479,7 +503,7 @@ function delRoom(i) { if (!confirm('Видалити?')) return; ROOMS.splice(i,
 // ─ SETTINGS ─
 function saveSettings() {
   SETTINGS.schoolName = $('sName')?.value || SETTINGS.schoolName;
-  SETTINGS.maxLessons = +$('sMax')?.value || 7;
+  SETTINGS.maxLessons = +$('sMax')?.value || 12;
   SETTINGS.norm       = +$('sNorm')?.value || 18;
   autosave(); toast('Налаштування збережено', 'ok');
 }

@@ -81,12 +81,12 @@ function _renderDayView(thead, tbody, dayIdx, q, sf, cfv, hs) {
   const ents = getDay(SCHED, dayIdx);
   const tm = {};
   ents.forEach(e => {
-    if (!tm[e.teacherId]) tm[e.teacherId] = Array(7).fill(null);
-    if (e.slot < 7) tm[e.teacherId][e.slot] = e;
+    if (!tm[e.teacherId]) tm[e.teacherId] = Array(BELLS.length).fill(null);
+    if (e.slot < BELLS.length) tm[e.teacherId][e.slot] = e;
   });
 
   thead.innerHTML = `<tr><th class="tc">Вчитель / Предмет</th>${
-    BELLS.map(b => `<th title="${b.s}–${b.e}">${b.n}<br><span style="font-weight:400;font-size:9px">${b.s}</span></th>`).join('')
+    BELLS.map((b, i) => `<th class="${i === 5 ? 'shift-sep' : ''}" title="${b.s}–${b.e}">${b.n}<br><span style="font-weight:400;font-size:9px">${b.s}</span></th>`).join('')
   }</tr>`;
 
   const list = TEACHERS.filter(t => {
@@ -98,7 +98,7 @@ function _renderDayView(thead, tbody, dayIdx, q, sf, cfv, hs) {
 
   let h = '';
   list.forEach(t => {
-    const row = tm[t.id] || Array(7).fill(null);
+    const row = tm[t.id] || Array(BELLS.length).fill(null);
     h += `<tr><td class="tn" style="border-left:3px solid ${t.color}" onclick="App.showTD(${t.id})">
       <div>${t.last} ${t.first}</div>
       <div style="font-size:10px;color:var(--muted)">${t.subjects.slice(0,2).map(s => sN(s)).join(', ')}</div>
@@ -115,9 +115,9 @@ function _renderDayView(thead, tbody, dayIdx, q, sf, cfv, hs) {
 
 function _renderWeekView(thead, tbody, q, sf, hs) {
   thead.innerHTML = `<tr><th class="tc">Вчитель</th>${
-    DAYS.map(d => `<th colspan="7" style="border-right:2px solid var(--border)">${d}</th>`).join('')
+    DAYS.map(d => `<th colspan="${BELLS.length}" class="day-sep">${d}</th>`).join('')
   }</tr><tr><th class="tc"></th>${
-    DAYS.map(() => BELLS.map(b => `<th>${b.n}</th>`).join('')).join('')
+    DAYS.map(() => BELLS.map((b, i) => `<th class="${i === 5 ? 'shift-sep' : ''}">${b.n}</th>`).join('')).join('')
   }</tr>`;
 
   const list = TEACHERS.filter(t => {
@@ -137,31 +137,35 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
       const ents = getDay(SCHED, d);
       const tm = {};
       ents.forEach(e => {
-        if (!tm[e.teacherId]) tm[e.teacherId] = Array(7).fill(null);
-        if (e.slot < 7) tm[e.teacherId][e.slot] = e;
+        if (!tm[e.teacherId]) tm[e.teacherId] = Array(BELLS.length).fill(null);
+        if (e.slot < BELLS.length) tm[e.teacherId][e.slot] = e;
       });
-      for (let l = 0; l < 7; l++) {
+      for (let l = 0; l < BELLS.length; l++) {
         const e   = tm[t.id]?.[l];
-        const bdr = d === 4 ? 'border-right:2px solid var(--border)' : '';
+        const clsN = (l === BELLS.length - 1) ? 'day-sep' : (l === 5 ? 'shift-sep' : '');
         if (e) {
           const cls  = cById(e.classId);
           const subj = sById(e.subjectId);
           const col  = subj ? subj.color : 'var(--acc)';
-          const tip  = `${t.last}·${subj ? subj.name : ''}·${cN(cls)}·${DAYS[d]}·${BELLS[l]?.s}`;
-          h += `<td class="droptarget" style="${bdr}" data-tch="${t.id}" data-day="${d}" data-slot="${l}"
+          const room = rN(e.roomId);
+          const tip  = `${t.last} · ${cN(cls)} ${e.group || ''}`;
+          h += `<td class="droptarget ${clsN}" data-tch="${t.id}" data-day="${d}" data-slot="${l}"
             ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${d},${l})"
             onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()">
             <span class="lc${t.absent ? ' lab' : hs ? ' lgen' : ''}"
-              style="font-size:9px;background:${col}22;color:${col};border:1px solid ${col}55;cursor:grab;display:block;text-align:center"
+              style="font-size:8px;background:${col}22;color:${col};border:1px solid ${col}55;cursor:grab"
               draggable="true"
               ondragstart="App.onDragStart(event,${t.id},${d},${l})"
               ondragend="App.onDragEnd(event)"
               onclick="App.showLD('${esc(JSON.stringify(e))}')"
-            >${cN(cls)}</span></td>`;
+            >
+              ${cN(cls)}
+              <span style="font-size:7px;opacity:0.8">${room}</span>
+            </span></td>`;
         } else {
-          h += `<td class="droptarget" style="${bdr}" data-tch="${t.id}" data-day="${d}" data-slot="${l}"
+          h += `<td class="droptarget ${clsN}" data-tch="${t.id}" data-day="${d}" data-slot="${l}"
             ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${d},${l})"
-            onclick="App.quickAdd(${t.id},${d},${l})" title="+ додати"></td>`;
+            onclick="App.quickAdd(${t.id},${d},${l})" title="+"></td>`;
         }
       }
     }
@@ -171,12 +175,15 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
 }
 
 function _cellHTML(e, t, l, dayIdx, hs) {
+  let clsName = (l === 5) ? 'shift-sep' : '';
+  if (l >= 6) clsName += ' s2-bg';
   if (e) {
     const cls  = cById(e.classId);
     const subj = sById(e.subjectId);
     const col  = subj ? subj.color : 'var(--acc)';
-    const tip  = `${t.last}·${subj ? subj.name : ''}·${cN(cls)}·${BELLS[l]?.s}–${BELLS[l]?.e}`;
-    return `<td class="droptarget" data-tch="${t.id}" data-day="${dayIdx}" data-slot="${l}"
+    const room = rN(e.roomId);
+    const tip  = `${t.last} · ${cN(cls)} ${e.group || ''}`;
+    return `<td class="droptarget ${clsName}" data-tch="${t.id}" data-day="${dayIdx}" data-slot="${l}"
       ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${dayIdx},${l})"
       onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()">
       <span class="lc${t.absent ? ' lab' : hs ? ' lgen' : e.group ? ' lgrp' : ''}"
@@ -185,11 +192,16 @@ function _cellHTML(e, t, l, dayIdx, hs) {
         ondragstart="App.onDragStart(event,${t.id},${dayIdx},${l})"
         ondragend="App.onDragEnd(event)"
         onclick="App.showLD('${esc(JSON.stringify(e))}')"
-      >${cN(cls)}${e.group ? `<br><span style="font-size:8px">${e.group}</span>` : ''}<span class="lnum">${l+1}</span></span></td>`;
+      >
+        <span class="lgroup">${e.group || ''}</span>
+        ${cN(cls)}
+        <span class="lroom">${room}</span>
+        <span class="lnum">${l+1}</span>
+      </span></td>`;
   } else {
-    return `<td class="droptarget" data-tch="${t.id}" data-day="${dayIdx}" data-slot="${l}"
+    return `<td class="droptarget ${clsName}" data-tch="${t.id}" data-day="${dayIdx}" data-slot="${l}"
       ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${dayIdx},${l})"
-      onclick="App.quickAdd(${t.id},${dayIdx},${l})" style="cursor:cell" title="+ додати / перетягніть"></td>`;
+      onclick="App.quickAdd(${t.id},${dayIdx},${l})" style="cursor:cell" title="+ додати"></td>`;
   }
 }
 
@@ -367,7 +379,7 @@ export function showTD(id) {
         const ents = getDay(SCHED, di).filter(e => e.teacherId === id);
         return `<div style="background:var(--bg);border-radius:8px;padding:7px">
           <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${d.slice(0,2)}</div>
-          ${ents.slice(0,7).map(e => { const cls = cById(e.classId); const subj = sById(e.subjectId); const col = subj ? subj.color : 'var(--acc)'; return `<div style="font-size:9px;padding:2px 4px;border-radius:3px;margin-bottom:2px;background:${col}18;color:${col};font-weight:700">${cN(cls)}</div>`; }).join('')}
+          ${ents.slice(0, BELLS.length).map(e => { const cls = cById(e.classId); const subj = sById(e.subjectId); const col = subj ? subj.color : 'var(--acc)'; return `<div style="font-size:9px;padding:2px 4px;border-radius:3px;margin-bottom:2px;background:${col}18;color:${col};font-weight:700">${cN(cls)}</div>`; }).join('')}
         </div>`;
       }).join('')}
     </div>`;

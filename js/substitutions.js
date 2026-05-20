@@ -6,7 +6,7 @@ Outputs: Renders #subsList, #subStats, #srRes, #fsResults; mutates ABSENCES/SUBL
 Dependencies: data.js, utils.js, ui.js
 */
 
-import { TEACHERS, ABSENCES, SUBLOG, SUBJECTS, CLASSES, SCHED, autosave } from './data.js';
+import { TEACHERS, ABSENCES, SUBLOG, SUBJECTS, CLASSES, SCHED, BELLS, autosave } from './data.js';
 import { $, toast, tN, sN, cN, tById, sById, cById, getDay } from './utils.js';
 import { openM, closeM } from './ui.js';
 
@@ -21,6 +21,10 @@ export function populateSubSearch() {
   if (fs  && fs.options.length  < 2) TEACHERS.forEach(t => fs.innerHTML  += `<option value="${t.id}">${tN(t)}</option>`);
   if (fa  && fa.options.length  < 2) TEACHERS.forEach(t => fa.innerHTML  += `<option value="${t.id}">${tN(t)}</option>`);
   if (fsS && fsS.options.length < 2) SUBJECTS.forEach(s => fsS.innerHTML += `<option value="${s.id}">${s.name}</option>`);
+
+  const srl = $('srLesson'), fsl = $('fsLesson');
+  if (srl && srl.options.length <= 7) srl.innerHTML = BELLS.map(b => `<option>${b.n}</option>`).join('');
+  if (fsl && fsl.options.length <= 7) fsl.innerHTML = BELLS.map(b => `<option>${b.n}</option>`).join('');
 }
 
 // ── RENDER SUBS PAGE ──

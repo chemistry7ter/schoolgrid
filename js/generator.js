@@ -96,10 +96,19 @@ export async function startGeneration() {
       if (groups && groups.length > 1) {
         groups.forEach((g, gi) => {
           const gt = tById(g.t) || tc[gi % tc.length];
-          reqs.push({ classId: cls.id, subjectId: +sid, teacherId: gt.id, hours: Math.ceil(h / groups.length), group: g.n });
+          reqs.push({ classId: cls.id, subjectId: +sid, teacherId: gt.id, hours: Math.ceil(h / groups.length), group: g.n, studentCount: g.count || 0 });
         });
       } else {
-        reqs.push({ classId: cls.id, subjectId: +sid, teacherId: tc[0].id, hours: h });
+        // Distribute hours among available teachers for this subject
+        const hPerT = Math.ceil(h / tc.length);
+        let remH = h;
+        tc.forEach((t, ti) => {
+          const take = Math.min(remH, hPerT);
+          if (take > 0) {
+            reqs.push({ classId: cls.id, subjectId: +sid, teacherId: t.id, hours: take, studentCount: cls.count || 0 });
+            remH -= take;
+          }
+        });
       }
     });
   });
@@ -110,16 +119,17 @@ export async function startGeneration() {
 
   // ── INIT FRESH SCHEDULE ──
   const ns = {};
-  for (let d = 0; d < 5; d++) { ns[d] = {}; for (let s = 0; s < 7; s++) ns[d][s] = []; }
+  for (let d = 0; d < 5; d++) { ns[d] = {}; for (let s = 0; s < BELLS.length; s++) ns[d][s] = []; }
 
-  const maxL  = +($('genMaxL')?.value  || 7);
+  const maxL  = +($('genMaxL')?.value  || 12);
   const bal   = $('genBal')?.checked   !== false;
   const noFri = $('genNoFri')?.checked;
 
   // ── TRACKING SETS ──
-  const tBusy = {}, cBusy = {}, cCount = {};
+  const tBusy = {}, cBusy = {}, rBusy = {}, cCount = {};
   TEACHERS.forEach(t => { tBusy[t.id] = {}; for (let d = 0; d < 5; d++) tBusy[t.id][d] = new Set(); });
   CLASSES.forEach(c  => { cBusy[c.id] = {}; cCount[c.id] = {}; for (let d = 0; d < 5; d++) { cBusy[c.id][d] = new Set(); cCount[c.id][d] = 0; } });
+  for (let d = 0; d < 5; d++) { rBusy[d] = {}; for (let s = 0; s < BELLS.length; s++) rBusy[d][s] = new Set(); }
 
   // ── CONSTRAINT CHECKER ──
   function canPlace(req, d, s) {
@@ -127,6 +137,23 @@ export async function startGeneration() {
     if (hard('no_double_teacher') && tBusy[req.teacherId]?.[d]?.has(s)) return false;
     if (hard('no_double_class')   && cBusy[req.classId]?.[d]?.has(s))   return false;
     if (hard('max_lessons_day')   && (cCount[req.classId]?.[d] || 0) >= maxL) return false;
+
+    const cls = cById(req.classId);
+    // Window check: if class already has lessons this day, new lesson must be adjacent
+    if (cCount[req.classId][d] > 0) {
+      const slots = Array.from(cBusy[req.classId][d]).sort((a,b) => a-b);
+      const minS = slots[0], maxS = slots[slots.length-1];
+      if (s !== minS - 1 && s !== maxS + 1) return false;
+    } else {
+      // First lesson of the day: respect shift
+      if (cls && cls.shift === 1 && s !== 0) return false; // First shift starts at 1st lesson
+      if (cls && cls.shift === 2 && s < 5) return false;   // Second shift starts later (e.g. 6th lesson)
+    }
+
+    // Room check with capacity
+    const roomId = findBestRoom(req.subjectId, req.teacherId, rBusy[d][s], req.studentCount || 0);
+    if (!roomId) return false;
+
     const t = tById(req.teacherId);
     if (hard('teacher_avail')  && t?.unavail?.includes(d)) return false;
     if (hard('teacher_absent') && t?.absent)                return false;
@@ -138,10 +165,11 @@ export async function startGeneration() {
 
   // ── PLACE ENTRY ──
   function place(req, d, s) {
-    const roomId = findBestRoom(req.subjectId, req.teacherId);
+    const roomId = findBestRoom(req.subjectId, req.teacherId, rBusy[d][s], req.studentCount || 0);
     ns[d][s].push({ classId: req.classId, subjectId: req.subjectId, teacherId: req.teacherId, roomId, group: req.group || null });
     tBusy[req.teacherId][d].add(s);
     cBusy[req.classId][d].add(s);
+    if (roomId) rBusy[d][s].add(roomId);
     cCount[req.classId][d] = (cCount[req.classId][d] || 0) + 1;
   }
 
@@ -164,16 +192,35 @@ export async function startGeneration() {
       }
     }
 
-    // Pass 2: relax soft constraints
+    // Pass 2: relax soft constraints (but keep shift and window constraints)
     if (tp > 0) {
-      for (let d = 0; d < 5 && tp > 0; d++) {
-        for (let s = 0; s < 7 && tp > 0; s++) {
+      for (const d of dayOrder) {
+        if (tp <= 0) break;
+        for (let s = 0; s < BELLS.length && tp > 0; s++) {
           const t = tById(req.teacherId);
           if (!tBusy[req.teacherId][d].has(s) &&
               !cBusy[req.classId][d].has(s)   &&
               (cCount[req.classId][d] || 0) < maxL &&
               !t?.absent) {
-            place(req, d, s); tp--; placed++;
+
+            // Still check window/shift here
+            const cls = cById(req.classId);
+            let ok = false;
+            if (cCount[req.classId][d] > 0) {
+              const slots = Array.from(cBusy[req.classId][d]).sort((a,b) => a-b);
+              const minS = slots[0], maxS = slots[slots.length-1];
+              if (s === minS - 1 || s === maxS + 1) ok = true;
+            } else {
+              if (cls && cls.shift === 1 && s === 0) ok = true;
+              if (cls && cls.shift === 2 && s >= 5) ok = true;
+            }
+
+            if (ok) {
+              const roomId = findBestRoom(req.subjectId, req.teacherId, rBusy[d][s], req.studentCount || 0);
+              if (roomId) {
+                place(req, d, s); tp--; placed++;
+              }
+            }
           }
         }
       }
@@ -261,7 +308,7 @@ export function runChecks() {
 
   // 1. Teacher double-booking
   for (let d = 0; d < 5; d++) {
-    for (let s = 0; s < 7; s++) {
+    for (let s = 0; s < BELLS.length; s++) {
       const ents = SCHED[d]?.[s] || [];
       const tc = {}, cc = {};
       ents.forEach(e => {
@@ -288,7 +335,7 @@ export function runChecks() {
   TEACHERS.forEach(t => {
     for (let d = 0; d < 5; d++) {
       const slots = [];
-      for (let s = 0; s < 7; s++) {
+      for (let s = 0; s < BELLS.length; s++) {
         if ((SCHED[d]?.[s] || []).some(e => e.teacherId === t.id)) slots.push(s);
       }
       if (slots.length > 1) {
@@ -301,7 +348,24 @@ export function runChecks() {
     }
   });
 
-  // 4. Curriculum fulfillment
+  // 4. Windows in class schedule
+  CLASSES.forEach(c => {
+    for (let d = 0; d < 5; d++) {
+      const slots = [];
+      for (let s = 0; s < BELLS.length; s++) {
+        if ((SCHED[d]?.[s] || []).some(e => e.classId === c.id)) slots.push(s);
+      }
+      if (slots.length > 1) {
+        let w = 0;
+        for (let i = slots[0] + 1; i < slots[slots.length - 1]; i++) {
+          if (!slots.includes(i)) w++;
+        }
+        if (w > 0) issues.push({ t:'c', msg:`❌ Вікно у класу ${cN(c)} — ${DAYS[d]}` });
+      }
+    }
+  });
+
+  // 5. Curriculum fulfillment
   CLASSES.forEach(cls => {
     const plan = CURRICULUM[cls.parallel] || {};
     Object.entries(plan).forEach(([sid, req]) => {

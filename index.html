@@ -89,9 +89,9 @@
         <div style="display:flex;gap:3px" id="dashDayBtns"></div>
       </div>
       <div class="swrap" style="border:none;border-radius:0;max-height:370px">
-        <table class="grid"><thead><tr>
+        <table class="grid"><thead id="dashThead"><tr>
           <th class="tc">Вчитель</th>
-          <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+          <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
         </tr></thead><tbody id="dashTbody"></tbody></table>
       </div>
       <div class="lgrow" style="padding:9px 15px;border-top:1px solid var(--border)">
@@ -307,7 +307,7 @@
         <div class="ch"><span class="ct"><i class="fa-solid fa-gear" style="color:var(--muted)"></i>Параметри</span></div>
         <div class="cb">
           <div class="fg"><label class="fl">Алгоритм</label><select class="fi" id="genAlgo"><option value="smart">Розумний backtracking</option><option value="greedy">Жадібний</option><option value="random">Рандомізований</option></select></div>
-          <div class="fg"><label class="fl">Макс. уроків на день (клас)</label><input class="fi" type="number" id="genMaxL" value="7" min="4" max="9"></div>
+          <div class="fg"><label class="fl">Макс. уроків на день (клас)</label><input class="fi" type="number" id="genMaxL" value="12" min="4" max="15"></div>
           <div class="fg"><label class="fl">Ітерацій оптимізації</label><input class="fi" type="number" id="genIter" value="300" min="50" max="2000"></div>
           <div class="toggle"><input type="checkbox" id="genBal" checked><label for="genBal">Рівномірний розподіл по тижню</label></div>
           <div class="toggle"><input type="checkbox" id="genNoFri"><label for="genNoFri">Уникати 6-7 уроків у п'ятницю</label></div>
@@ -378,7 +378,7 @@
         <div class="fg"><label class="fl">Назва школи</label><input class="fi" id="sName" value="Школа №7 м. Тернопіль"></div>
         <div class="fg"><label class="fl">Навчальний рік</label><input class="fi" id="sYear" value="2025–2026"></div>
         <div class="fr">
-          <div class="fg"><label class="fl">Макс. уроків/день</label><input class="fi" type="number" id="sMax" value="7"></div>
+          <div class="fg"><label class="fl">Макс. уроків/день</label><input class="fi" type="number" id="sMax" value="12" min="1" max="15"></div>
           <div class="fg"><label class="fl">Норма год/тиж</label><input class="fi" type="number" id="sNorm" value="18"></div>
         </div>
         <div class="toggle"><input type="checkbox" id="sAuto" checked><label for="sAuto">Авто-пошук замін</label></div>
@@ -509,7 +509,10 @@
   <div class="mb">
     <div class="fr"><div class="fg"><label class="fl">Паралель</label><select class="fi" id="clsP"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option></select></div><div class="fg"><label class="fl">Літера</label><input class="fi" id="clsL" placeholder="А" maxlength="2"></div></div>
     <div class="fr"><div class="fg"><label class="fl">Кл. керівник</label><select class="fi" id="clsT"><option value="">Оберіть...</option></select></div><div class="fg"><label class="fl">Учнів</label><input class="fi" type="number" id="clsCnt" value="28"></div></div>
-    <div class="fg"><label class="fl">Осн. кабінет</label><select class="fi" id="clsR"><option value="">Немає</option></select></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Осн. кабінет</label><select class="fi" id="clsR"><option value="">Немає</option></select></div>
+      <div class="fg"><label class="fl">Зміна</label><select class="fi" id="clsShift"><option value="1">1 зміна</option><option value="2">2 зміна</option></select></div>
+    </div>
   </div>
   <div class="mf"><button class="bs" onclick="App.closeM('addClass')">Скасувати</button><button class="bp" onclick="App.saveClass()"><i class="fa-solid fa-check"></i>Зберегти</button></div>
 </div></div>
