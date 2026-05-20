@@ -96,7 +96,7 @@ function renderDashTable() {
   renderDashStats();
   renderDashDayBtns();
   const th = $('dashThead'), tb = $('dashTbody'); if (!tb) return;
-  if (th) th.innerHTML = `<tr><th class="tc">Вчитель</th>${BELLS.map(b => `<th>${b.n}</th>`).join('')}</tr>`;
+  if (th) th.innerHTML = `<tr><th class="tc">Вчитель</th>${BELLS.map((b, i) => `<th class="${i === 5 ? 'shift-sep' : ''}">${b.n}</th>`).join('')}</tr>`;
   const ents = getDay(SCHED, dashDay);
   const tm   = {};
   ents.forEach(e => {
@@ -113,17 +113,21 @@ function renderDashTable() {
       ${t.absent ? '<span class="tag td" style="font-size:9px;padding:1px 4px">відс.</span>' : ''}
     </td>`;
     row.forEach((e, l) => {
+      const clsN = (l === 5) ? 'shift-sep' : '';
       if (e) {
         const cls  = cById(e.classId);
         const subj = sById(e.subjectId);
         const col  = subj ? subj.color : 'var(--acc)';
-        h += `<td><span class="lc${t.absent ? ' lab' : hs ? ' lgen' : ''}"
+        const room = rN(e.roomId);
+        h += `<td class="${clsN}"><span class="lc${t.absent ? ' lab' : hs ? ' lgen' : ''}"
           style="background:${col}22;color:${col};border:1px solid ${col}55"
           onclick="App.showLD('${e ? JSON.stringify(e).replace(/'/g,"\\'") : ''}')">
-          ${cN(cls)}${e.group ? '<br><span style="font-size:8px">' + e.group + '</span>' : ''}
+          <span class="lgroup">${e.group || ''}</span>
+          ${cN(cls)}
+          <span class="lroom">${room}</span>
           <span class="lnum">${l+1}</span></span></td>`;
       } else {
-        h += '<td></td>';
+        h += `<td class="${clsN}"></td>`;
       }
     });
     h += '</tr>';

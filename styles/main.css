@@ -100,12 +100,19 @@ table.grid tr:hover td:not(.tn){background:#fafbff}
 table.grid tr:last-child td{border-bottom:none}
 
 /* Lesson cells */
-.lc{background:var(--accl);color:var(--acc);border-radius:4px;padding:2px 5px;font-weight:600;font-size:10.5px;cursor:pointer;transition:.12s;line-height:1.3;display:inline-block;min-width:34px;text-align:center}
-.lc:hover{background:var(--acc);color:#fff;transform:scale(1.07)}
+.lc{background:var(--accl);color:var(--acc);border-radius:4px;padding:3px 6px;font-weight:600;font-size:10.5px;cursor:pointer;transition:.12s;line-height:1.2;display:flex;flex-direction:column;align-items:center;min-width:40px;text-align:center;gap:1px}
+.lc:hover{background:var(--acc);color:#fff;transform:scale(1.05)}
 .lc.lab{background:var(--errbg);color:var(--err)}
 .lc.lgen{background:var(--okbg);color:var(--ok)}
 .lc.lgrp{background:var(--purbg);color:var(--pur)}
-.lnum{font-size:8px;opacity:.65;display:block;line-height:1.2}
+.lnum{font-size:8px;opacity:.65;display:block;line-height:1}
+.lroom{font-size:9px;font-weight:700;opacity:0.9;margin-top:1px;background:rgba(255,255,255,0.3);padding:0 3px;border-radius:3px}
+.lgroup{font-size:8px;font-style:italic;line-height:1}
+
+/* ── SHIFT & DAY SPLITS ── */
+.day-sep { border-right: 3px solid var(--acc)!important; }
+.shift-sep { border-right: 2px dashed var(--muted)!important; background: rgba(0,0,0,0.015); }
+body.dark .shift-sep { background: rgba(255,255,255,0.03); }
 
 /* ── DRAG AND DROP ── */
 .lc[draggable="true"]{cursor:grab}
