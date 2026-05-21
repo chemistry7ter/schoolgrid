@@ -38,6 +38,8 @@ export function showTip(e, html) {
 export function hideTip() {
   const t = tipEl(); if (t) t.style.display = 'none';
 }
+window.showTip = showTip;
+window.hideTip = hideTip;
 
 // ── Data lookup shortcuts ──
 // These are populated lazily via setLookups() after data.js loads

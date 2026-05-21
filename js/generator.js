@@ -195,7 +195,7 @@ export async function startGeneration() {
     // Pass 1: with all constraints
     for (const d of dayOrder) {
       if (tp <= 0) break;
-      for (let s = 0; s < maxL && tp > 0; s++) {
+      for (let s = 0; s < BELLS.length && tp > 0; s++) {
         if (canPlace(req, d, s)) { place(req, d, s); tp--; placed++; break; }
       }
     }

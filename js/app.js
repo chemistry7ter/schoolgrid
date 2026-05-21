@@ -15,7 +15,7 @@ import {
 
 import {
   $, toast, showTip, hideTip, setLookups, tById, cById, sById,
-  tN, sN, cN, rN, getDay, findBestRoom, PAL,
+  tN, sN, cN, rN, getDay, findBestRoom, PAL, esc,
 } from './utils.js';
 
 import {
@@ -32,7 +32,7 @@ import {
   switchDay, switchCDay, setView,
   quickAdd, applyQL, showLD, showTD,
   onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop,
-  showTipW, hideTipW, getCurDay, setCurDay,
+  getCurDay, setCurDay,
 } from './schedule.js';
 
 import {
@@ -123,7 +123,7 @@ function renderDashTable() {
         const tip  = `${t.last} · ${cN(cls)} ${e.group || ''}`;
         h += `<td class="${clsN}"><span class="lc${t.absent ? ' lab' : hs ? ' lgen' : e.group ? ' lgrp' : ''}"
           style="background:${col}22;color:${col};border:1px solid ${col}55"
-          onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()"
+          onmouseenter="showTip(event,'${esc(tip)}')" onmouseleave="hideTip()"
           onclick="App.showLD('${esc(JSON.stringify(e))}')">
           <span class="lgroup">${e.group || ''}</span>
           ${cN(cls)}
@@ -584,7 +584,6 @@ window.App = {
   // schedule
   switchDay, switchCDay, setView, quickAdd, applyQL, showLD, showTD,
   onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop,
-  showTipW, hideTipW,
   // generator
   startGeneration, validateOnly, toggleHard, toggleSoft,
   // conflicts

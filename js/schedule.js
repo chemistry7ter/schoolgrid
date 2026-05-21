@@ -153,7 +153,7 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
           const tip  = `${t.last} · ${cN(cls)} ${e.group || ''}`;
           h += `<td class="droptarget ${clsN}" data-tch="${t.id}" data-day="${d}" data-slot="${l}"
             ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${d},${l})"
-            onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()">
+            onmouseenter="showTip(event,'${esc(tip)}')" onmouseleave="hideTip()">
             <span class="lc${t.absent ? ' lab' : hs ? ' lgen' : e.group ? ' lgrp' : ''}"
               style="background:${col}22;color:${col};border:1px solid ${col}55;cursor:grab"
               draggable="true"
@@ -188,7 +188,7 @@ function _cellHTML(e, t, l, dayIdx, hs) {
     const tip  = `${t.last} · ${cN(cls)} ${e.group || ''}`;
     return `<td class="droptarget ${clsName}" data-tch="${t.id}" data-day="${dayIdx}" data-slot="${l}"
       ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${dayIdx},${l})"
-      onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()">
+      onmouseenter="showTip(event,'${esc(tip)}')" onmouseleave="hideTip()">
       <span class="lc${t.absent ? ' lab' : hs ? ' lgen' : e.group ? ' lgrp' : ''}"
         style="background:${col}22;color:${col};border:1px solid ${col}55;cursor:grab"
         draggable="true"
@@ -467,6 +467,3 @@ function _classWeekHTML(cls, gD, isG, sF) {
   return h + '</tbody></table>';
 }
 
-// expose tooltip helpers for inline handlers
-export const showTipW = showTip;
-export const hideTipW = hideTip;
