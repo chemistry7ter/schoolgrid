@@ -89,9 +89,10 @@ export async function startGeneration() {
     const plan = CURRICULUM[cls.parallel] || {};
     Object.entries(plan).forEach(([sid, h]) => {
       const subj = sById(+sid); if (!subj) return;
-      const tc = TEACHERS.filter(t => t.subjects.includes(+sid) && !t.absent);
+      const checkA = HARD_CONSTRAINTS.find(c => c.id === 'teacher_absent' && c.enabled);
+      const tc = TEACHERS.filter(t => t.subjects.includes(+sid) && (!checkA || !t.absent));
       if (!tc.length) {
-        glog(`⚠ Немає вчителя: ${subj.name} у ${cN(cls)}`, 'lw');
+        glog(`⚠ Немає вільних вчителів для предмету "${subj.name}" у класі ${cN(cls)} (перевірте список вчителів або статус відсутності)`, 'lw');
         return;
       }
       const groups = cls.groups && cls.groups[sid];
@@ -207,10 +208,11 @@ export async function startGeneration() {
         if (tp <= 0) break;
         for (let s = 0; s < BELLS.length && tp > 0; s++) {
           const t = tById(req.teacherId);
+          const hard = id => HARD_CONSTRAINTS.find(c => c.id === id && c.enabled);
           if (!tBusy[req.teacherId][d].has(s) &&
               !cBusy[req.classId][d].has(s)   &&
               (cCount[req.classId][d] || 0) < maxL &&
-              !t?.absent) {
+              (!hard('teacher_absent') || !t?.absent)) {
 
             // Still check window/shift here
             const cls = cById(req.classId);
