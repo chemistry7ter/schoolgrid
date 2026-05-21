@@ -114,9 +114,9 @@ function _renderDayView(thead, tbody, dayIdx, q, sf, cfv, hs) {
 }
 
 function _renderWeekView(thead, tbody, q, sf, hs) {
-  thead.innerHTML = `<tr><th class="tc">Вчитель</th>${
+  thead.innerHTML = `<tr><th class="tc" rowspan="2">Вчитель</th>${
     DAYS.map(d => `<th colspan="${BELLS.length}" class="day-sep">${d}</th>`).join('')
-  }</tr><tr><th class="tc"></th>${
+  }</tr><tr>${
     DAYS.map(() => BELLS.map((b, i) => `<th class="${i === 5 ? 'shift-sep' : ''}">${b.n}</th>`).join('')).join('')
   }</tr>`;
 
