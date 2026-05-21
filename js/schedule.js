@@ -87,7 +87,7 @@ function _renderDayView(thead, tbody, dayIdx, q, sf, cfv, hs) {
   });
 
   thead.innerHTML = `<tr><th class="tc">Вчитель / Предмет</th>${
-    BELLS.map((b, i) => `<th class="${i === 5 ? 'shift-sep' : ''}" title="${b.s}–${b.e}">${b.n}<br><span style="font-weight:400;font-size:9px">${b.s}</span></th>`).join('')
+    BELLS.map((b, i) => `<th class="${i === 5 ? 'shift-sep' : (i === BELLS.length - 1 ? 'day-sep' : '')}" title="${b.s}–${b.e}">${b.n}<br><span style="font-weight:400;font-size:9px">${b.s}</span></th>`).join('')
   }</tr>`;
 
   const list = TEACHERS.filter(t => {
@@ -119,7 +119,7 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
   thead.innerHTML = `<tr><th class="tc">Вчитель</th>${
     DAYS.map(d => `<th colspan="${BELLS.length}" class="day-sep">${d}</th>`).join('')
   }</tr><tr><th class="tc"></th>${
-    DAYS.map(() => BELLS.map((b, i) => `<th class="${i === 5 ? 'shift-sep' : ''}">${b.n}</th>`).join('')).join('')
+    DAYS.map(() => BELLS.map((b, i) => `<th class="${i === 5 ? 'shift-sep' : (i === BELLS.length - 1 ? 'day-sep' : '')}">${b.n}</th>`).join('')).join('')
   }</tr>`;
 
   const list = TEACHERS.filter(t => {
@@ -155,7 +155,7 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
             ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${d},${l})"
             onmouseenter="showTip(event,'${esc(tip)}')" onmouseleave="hideTip()">
             <span class="lc${t.absent ? ' lab' : hs ? ' lgen' : e.group ? ' lgrp' : ''}"
-              style="background:${col}22;color:${col};border:1px solid ${col}55;cursor:grab"
+              style="background:${col}28;color:${col};border:1px solid ${col}66;cursor:grab"
               draggable="true"
               ondragstart="App.onDragStart(event,${t.id},${d},${l})"
               ondragend="App.onDragEnd(event)"
@@ -164,6 +164,7 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
               <span class="lgroup">${e.group || ''}</span>
               ${cN(cls)}
               <span class="lroom">${room}</span>
+              <span class="lnum">${l+1}</span>
             </span></td>`;
         } else {
           h += `<td class="droptarget ${clsN}" data-tch="${t.id}" data-day="${d}" data-slot="${l}"
@@ -178,7 +179,7 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
 }
 
 function _cellHTML(e, t, l, dayIdx, hs) {
-  let clsName = (l === 5) ? 'shift-sep' : '';
+  let clsName = (l === 5) ? 'shift-sep' : (l === BELLS.length - 1 ? 'day-sep' : '');
   if (l >= 6) clsName += ' s2-bg';
   if (e) {
     const cls  = cById(e.classId);
@@ -190,7 +191,7 @@ function _cellHTML(e, t, l, dayIdx, hs) {
       ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${dayIdx},${l})"
       onmouseenter="showTip(event,'${esc(tip)}')" onmouseleave="hideTip()">
       <span class="lc${t.absent ? ' lab' : hs ? ' lgen' : e.group ? ' lgrp' : ''}"
-        style="background:${col}22;color:${col};border:1px solid ${col}55;cursor:grab"
+        style="background:${col}28;color:${col};border:1px solid ${col}66;cursor:grab"
         draggable="true"
         ondragstart="App.onDragStart(event,${t.id},${dayIdx},${l})"
         ondragend="App.onDragEnd(event)"
@@ -466,4 +467,3 @@ function _classWeekHTML(cls, gD, isG, sF) {
   });
   return h + '</tbody></table>';
 }
-

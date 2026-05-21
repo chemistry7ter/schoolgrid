@@ -96,7 +96,7 @@ function renderDashTable() {
   renderDashStats();
   renderDashDayBtns();
   const th = $('dashThead'), tb = $('dashTbody'); if (!tb) return;
-  if (th) th.innerHTML = `<tr><th class="tc">Вчитель</th>${BELLS.map((b, i) => `<th class="${i === 5 ? 'shift-sep' : ''}">${b.n}</th>`).join('')}</tr>`;
+  if (th) th.innerHTML = `<tr><th class="tc">Вчитель</th>${BELLS.map((b, i) => `<th class="${i === 5 ? 'shift-sep' : (i === 11 ? 'day-sep' : '')}">${b.n}</th>`).join('')}</tr>`;
   const ents = getDay(SCHED, dashDay);
   const tm   = {};
   ents.forEach(e => {
