@@ -154,8 +154,9 @@ export async function startGeneration() {
       }
     } else if (hard('shift_respect')) {
       // First lesson of the day: respect shift
+      // Preference: Shift 1 starts at Period 1, Shift 2 starts at Period 6
       if (cls && cls.shift === 1 && s !== 0) return false;
-      if (cls && cls.shift === 2 && s < 5) return false;
+      if (cls && cls.shift === 2 && s !== 5) return false;
     }
 
     // Room check with capacity
@@ -234,8 +235,9 @@ export async function startGeneration() {
             } else {
               if (!checkS) ok = true;
               else {
-                if (cls && cls.shift === 1 && s === 0) ok = true;
-                if (cls && cls.shift === 2 && s >= 5) ok = true;
+                // Pass 2: Allow flexible start within shift boundaries
+                if (cls && cls.shift === 1 && s <= 2) ok = true; // Allow starting up to 3rd lesson for Shift 1
+                if (cls && cls.shift === 2 && s >= 5) ok = true; // Shift 2 anywhere from 6th lesson
               }
             }
 
