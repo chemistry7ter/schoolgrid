@@ -155,15 +155,15 @@ function _renderWeekView(thead, tbody, q, sf, hs) {
             ondragover="App.onDragOver(event)" ondragleave="App.onDragLeave(event)" ondrop="App.onDrop(event,${t.id},${d},${l})"
             onmouseenter="App.showTipW(event,'${esc(tip)}')" onmouseleave="App.hideTipW()">
             <span class="lc${t.absent ? ' lab' : hs ? ' lgen' : e.group ? ' lgrp' : ''}"
-              style="background:${col}22;color:${col};border:1px solid ${col}55;cursor:grab;font-size:12px;padding:3px"
+              style="background:${col}22;color:${col};border:1px solid ${col}55;cursor:grab"
               draggable="true"
               ondragstart="App.onDragStart(event,${t.id},${d},${l})"
               ondragend="App.onDragEnd(event)"
               onclick="App.showLD('${esc(JSON.stringify(e))}')"
             >
-              <span class="lgroup" style="font-size:9px">${e.group || ''}</span>
+              <span class="lgroup">${e.group || ''}</span>
               ${cN(cls)}
-              <span class="lroom" style="font-size:9px;padding:0 2px">${room}</span>
+              <span class="lroom">${room}</span>
             </span></td>`;
         } else {
           h += `<td class="droptarget ${clsN}" data-tch="${t.id}" data-day="${d}" data-slot="${l}"
